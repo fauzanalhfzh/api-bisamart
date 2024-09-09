@@ -1,14 +1,17 @@
 # User API Spec
 
-## Sending OTP
+## Register User
 
-Endpoint POST /api/users/phone-otp-request
+Endpoint POST /api/users
 
 Request Body :
 
 ```json
 {
-  "phone_number": "0812345"
+  "name": "Zen ALhaifzh",
+  "phone_number": "0812345",
+  "email": "test@example.com",
+  "password": "test123"
 }
 ```
 
@@ -17,7 +20,9 @@ Response Body (Success) :
 ```json
 {
   "data": {
-    "phone_number": "0812345"
+    "name": "Zen ALhaifzh",
+    "phone_number": "0812345",
+    "email": "test@example.com"
   }
 }
 ```
@@ -30,46 +35,16 @@ Response Body (Failed) :
 }
 ```
 
-## Verify OTP
+## Login User
 
-Endpoint : POST /api/users/verify-otp
-
-Request Body :
-
-```json
-{
-  "phone_number": "0812345",
-  "otp": "12345"
-}
-```
-
-Response Body (Success) :
-
-```json
-{
-  "data": "Phone number verification successfully"
-}
-```
-
-Response Body (Failed) :
-
-```json
-{
-  "errors": "OTP is wrong"
-}
-```
-
-## Sending Email OTP
-
-Endpoint : POST /api/users/email-otp-request
+Endpoint : POST /api/users/login
 
 Request Body :
 
 ```json
 {
-  "name": "Zen Alhafizh",
   "email": "test@example.com",
-  "user_id": "_id1234143"
+  "password": "test123"
 }
 ```
 
@@ -79,7 +54,9 @@ Response Body (Success) :
 {
   "data": {
     "email": "test@example.com",
-    "name": "Zen Alhafizh"
+    "phone_number": "0812345",
+    "name": "Zen Alhafizh",
+    "token": "session_id_generated"
   }
 }
 ```
@@ -88,60 +65,37 @@ Response Body (Failed) :
 
 ```json
 {
-  "errors": "Email OTP is wrong"
+  "errors": "Username or password is wrong"
 }
 ```
 
-## Verify Email OTP
-
-Endpoint : PUT /api/users/email-otp-verify
-
-Request Body :
-
-```json
-{
-  "otp": "12345",
-  "token": "token"
-}
-```
-
-Response Body (Success) :
-
-```json
-{
-  "data": "Email verification successfully"
-}
-```
-
-Response Body (Failed) :
-
-```json
-{
-  "errors": "Activation code expired"
-}
-```
-
-## Get Logged In User Data
+## Get User
 
 Endpoint : GET /api/users/current
 
 Headers :
 
-- Authorization : jwtToken
+- Authorization: token
 
 Response Body (Success) :
 
 ```json
 {
   "data": {
-    "name": "Zen Alhafizh",
+    "id": 1,
+    "email": "test@example.com",
     "phone_number": "0812345",
-    "email": "test@example.com"
+    "name": "Zen Alhafizh",
+    "ratings": 5,
+    "total_rides": 2,
+    "created_at": "22-09-2024",
+    "updated_at": "22-09-2024",
+    "token": "session_id_generated"
   }
 }
 ```
 
-Request Error (Failed) :
+Response Body (Failed) :
 
 ```json
 {
@@ -149,5 +103,26 @@ Request Error (Failed) :
 }
 ```
 
-## Get Orders
+## Update User
 
+Endpoint : Patch /api/users/current
+
+Request Body :
+
+```json
+{
+  "name": "Fauzan Alhafizh", // optional, if want to change name
+  "password": "rahasia" // optional, if want to change password
+}
+```
+
+Response Body (Success) :
+
+```json
+{
+  "data": {
+    "name": "Fauzan Alhafizh", // optional, if want to change name
+    "password": "rahasia" // optional, if want to change password
+  }
+}
+```

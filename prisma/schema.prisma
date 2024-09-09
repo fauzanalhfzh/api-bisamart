@@ -3,21 +3,22 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model user {
-  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
-  name               String?
-  phone_number       String   @unique
-  email              String?  @unique
-  notification_token String?
-  ratings            Float    @default(0)
-  total_rides        Float    @default(0)
-  created_at         DateTime @default(now())
-  updated_at         DateTime @updatedAt
-  orders             orders[] @relation("user_orders")
+  id           Int      @id @default(autoincrement())
+  name         String?
+  phone_number String   @unique
+  email        String   @unique
+  password     String
+  ratings      Float    @default(0)
+  total_rides  Float    @default(0)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  token        String?
+  orders       orders[] @relation("user_orders")
 }
 
 enum VehicleType {
@@ -30,11 +31,19 @@ enum StatusDriver {
   ACTIVE
 }
 
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  COMPLETED
+  CANCELLED
+}
+
 model driver {
-  id                  String       @id @default(auto()) @map("_id") @db.ObjectId
+  id                  Int          @id @default(autoincrement())
   name                String
   phone_number        String       @unique
   email               String       @unique
+  password            String
   country             String
   ktp                 String       @unique
   address_ktp         String
@@ -48,7 +57,6 @@ model driver {
   license_plate       String
   registration_number String
   profil_img          String
-  notification_token  String
   ratings             Float        @default(0)
   total_earning       Float        @default(0)
   total_rides         Float        @default(0)
@@ -57,21 +65,22 @@ model driver {
   status              StatusDriver @default(ACTIVE)
   created_at          DateTime     @default(now())
   updated_at          DateTime     @updatedAt
+  token               String?      @db.VarChar(100)
   orders              orders[]     @relation("driver_orders")
 }
 
 model orders {
-  id                        String   @id @default(auto()) @map("_id") @db.ObjectId
-  user_id                   String   @db.ObjectId
-  driver_id                 String   @db.ObjectId
+  id                        Int         @id @default(autoincrement())
+  user_id                   Int
+  driver_id                 Int
   charge                    Float
   current_location_name     String
   destination_location_name String
   distance                  String
-  status                    String
+  status                    OrderStatus @default(PENDING)
   rating                    Float?
-  user                      user     @relation("user_orders", fields: [user_id], references: [id])
-  driver                    driver   @relation("driver_orders", fields: [driver_id], references: [id])
-  cratedAt                  DateTime @default(now())
-  updatedAt                 DateTime @updatedAt
+  user                      user        @relation("user_orders", fields: [user_id], references: [id])
+  driver                    driver      @relation("driver_orders", fields: [driver_id], references: [id])
+  cratedAt                  DateTime    @default(now())
+  updatedAt                 DateTime    @updatedAt
 }

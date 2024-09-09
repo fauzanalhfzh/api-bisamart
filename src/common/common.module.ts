@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { Global, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import { ValidationService } from './validation.service';
 import { WinstonModule } from 'nest-winston';
@@ -8,6 +8,7 @@ import { APP_FILTER } from '@nestjs/core';
 import { ErrorFilter } from './error.filter';
 import { AuthMiddleware } from './auth.middleware';
 
+@Global()
 @Module({
   imports: [
     WinstonModule.forRoot({
