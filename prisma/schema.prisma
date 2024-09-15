@@ -62,7 +62,7 @@ model driver {
   total_rides         Float        @default(0)
   pending_rides       Float        @default(0)
   cancel_rides        Float        @default(0)
-  status              StatusDriver @default(ACTIVE)
+  status              StatusDriver @default(INACTIVE)
   created_at          DateTime     @default(now())
   updated_at          DateTime     @updatedAt
   token               String?      @db.VarChar(100)
