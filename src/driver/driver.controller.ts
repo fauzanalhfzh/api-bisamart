@@ -1,8 +1,35 @@
-import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Patch,
+  Post,
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common';
 import { DriverService } from './driver.service';
 import { WebResponse } from 'src/model/web.model';
-import { DriverResponse, RegisterDriverRequest } from 'src/model/driver.model';
-import { ApiOperation } from '@nestjs/swagger';
+import {
+  DriverResponse,
+  LoginDriverRequest,
+  RegisterDriverRequest,
+  UpdateStatusRequest,
+} from 'src/model/driver.model';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiSecurity,
+} from '@nestjs/swagger';
+import {
+  FileFieldsInterceptor,
+  FilesInterceptor,
+} from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { Auth } from 'src/common/auth.decorator';
+import { driver } from '@prisma/client';
 
 @Controller('/api/drivers')
 export class DriverController {
@@ -11,10 +38,110 @@ export class DriverController {
   @Post()
   @HttpCode(200)
   @ApiOperation({ summary: 'Register new driver' })
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: 'ktp_img', maxCount: 1 },
+        { name: 'sim_img', maxCount: 1 },
+        { name: 'selfie_with_sim', maxCount: 1 },
+        { name: 'profile_img', maxCount: 1 },
+      ],
+      {
+        storage: diskStorage({
+          destination: (req, file, cb) => {
+            if (file.fieldname === 'ktp_img') {
+              cb(null, './public/drivers/ktp');
+            } else if (file.fieldname === 'sim_img') {
+              cb(null, './public/drivers/sim');
+            } else if (file.fieldname === 'selfie_with_sim') {
+              cb(null, './public/drivers/selfie');
+            } else if (file.fieldname === 'profile_img') {
+              cb(null, './public/drivers/profile');
+            }
+          },
+          filename: (req, file, cb) => {
+            const randomName = Date.now() + extname(file.originalname);
+            cb(null, randomName);
+          },
+        }),
+      },
+    ),
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Driver registration',
+    type: RegisterDriverRequest,
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        phone_number: { type: 'string' },
+        email: { type: 'string' },
+        password: { type: 'string' },
+        country: { type: 'string' },
+        ktp: { type: 'string' },
+        address_ktp: { type: 'string' },
+        ktp_img: { type: 'string', format: 'binary' },
+        vehicle_type: { type: 'string' },
+        sim: { type: 'string' },
+        sim_img: { type: 'string', format: 'binary' },
+        selfie_with_sim: { type: 'string', format: 'binary' },
+        vehicle_brand: { type: 'string' },
+        vehicle_color: { type: 'string' },
+        license_plate: { type: 'string' },
+        registration_number: { type: 'string' },
+        profil_img: { type: 'string', format: 'binary' },
+      },
+    },
+  })
   async register(
     @Body() request: RegisterDriverRequest,
+    @UploadedFiles()
+    files: {
+      ktp_img?: Express.Multer.File[];
+      sim_img?: Express.Multer.File[];
+      selfie_with_sim?: Express.Multer.File[];
+      profile_img?: Express.Multer.File[];
+    },
   ): Promise<WebResponse<DriverResponse>> {
-    const result = await this.driverService.register(request);
+    const result = await this.driverService.register(request, files);
+    return {
+      data: result,
+    };
+  }
+
+  @Post('/login')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Login driver' })
+  async login(
+    @Body() request: LoginDriverRequest,
+  ): Promise<WebResponse<DriverResponse>> {
+    const result = await this.driverService.login(request);
+    return {
+      data: result,
+    };
+  }
+
+  @Get('/current')
+  @HttpCode(200)
+  @ApiSecurity('Authorization')
+  @ApiOperation({ summary: 'Get driver data' })
+  async get(@Auth() driver: driver): Promise<WebResponse<DriverResponse>> {
+    const result = await this.driverService.get(driver);
+    return {
+      data: result,
+    };
+  }
+
+  @Patch('/current')
+  @HttpCode(200)
+  @ApiSecurity('Authorization')
+  @ApiOperation({ summary: 'Update driver status' })
+  async updateStatus(
+    @Auth() driver: driver,
+    @Body() request: UpdateStatusRequest,
+  ): Promise<WebResponse<DriverResponse>> {
+    const result = await this.driverService.updateStatus(driver, request);
     return {
       data: result,
     };

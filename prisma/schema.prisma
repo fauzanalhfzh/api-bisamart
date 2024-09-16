@@ -56,7 +56,7 @@ model driver {
   vehicle_color       String
   license_plate       String
   registration_number String
-  profil_img          String
+  profile_img         String
   ratings             Float        @default(0)
   total_earning       Float        @default(0)
   total_rides         Float        @default(0)

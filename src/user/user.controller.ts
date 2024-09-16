@@ -50,7 +50,7 @@ export class UserController {
   @Get('/current')
   @HttpCode(200)
   @ApiSecurity('Authorization')
-  @ApiOperation({ summary: 'Get users' })
+  @ApiOperation({ summary: 'Get user data' })
   async get(@Auth() user: user): Promise<WebResponse<UserResponse>> {
     const result = await this.userService.get(user);
     return {

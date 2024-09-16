@@ -3,10 +3,16 @@ import { PrismaService } from '../common/prisma.service';
 import { ValidationService } from '../common/validation.service';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import { DriverResponse, RegisterDriverRequest } from '../model/driver.model';
+import {
+  DriverResponse,
+  LoginDriverRequest,
+  RegisterDriverRequest,
+  UpdateStatusRequest,
+} from '../model/driver.model';
 import { DriverValidation } from './driver.validation';
 import * as bcrypt from 'bcrypt';
 import { driver } from '@prisma/client';
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class DriverService {
@@ -34,7 +40,7 @@ export class DriverService {
       vehicle_color: driver.vehicle_color,
       license_plate: driver.license_plate,
       registration_number: driver.registration_number,
-      profil_img: driver.profil_img,
+      profile_img: driver.profile_img,
       ratings: driver.ratings,
       total_earning: driver.total_earning,
       total_rides: driver.total_rides,
@@ -52,7 +58,15 @@ export class DriverService {
     return driverResponse;
   }
 
-  async register(request: RegisterDriverRequest): Promise<DriverResponse> {
+  async register(
+    request: RegisterDriverRequest,
+    files: {
+      ktp_img?: Express.Multer.File[];
+      sim_img?: Express.Multer.File[];
+      selfie_with_sim?: Express.Multer.File[];
+      profile_img?: Express.Multer.File[];
+    },
+  ): Promise<DriverResponse> {
     this.logger.debug(`DriverService.register(${JSON.stringify(request)})`);
 
     const registerRequest: RegisterDriverRequest =
@@ -70,10 +84,91 @@ export class DriverService {
 
     registerRequest.password = await bcrypt.hash(registerRequest.password, 10);
 
+    if (files.ktp_img?.[0]) {
+      registerRequest.ktp_img = `/public/drivers/ktp/${files.ktp_img[0].filename}`;
+    }
+    if (files.sim_img?.[0]) {
+      registerRequest.sim_img = `/public/drivers/sim/${files.sim_img[0].filename}`;
+    }
+    if (files.selfie_with_sim?.[0]) {
+      registerRequest.selfie_with_sim = `/public/drivers/selfie/${files.selfie_with_sim[0].filename}`;
+    }
+    if (files.profile_img?.[0]) {
+      registerRequest.profile_img = `/public/drivers/profile/${files.profile_img[0].filename}`;
+    }
+
     const driver = await this.prismaService.driver.create({
       data: registerRequest,
     });
 
     return this.toDriverResponse(driver);
+  }
+
+  async login(request: LoginDriverRequest): Promise<DriverResponse> {
+    this.logger.debug(`DriverService.login(${JSON.stringify(request)})`);
+
+    const loginRequest: LoginDriverRequest = this.validationService.validate(
+      DriverValidation.LOGIN,
+      request,
+    );
+
+    let driver = await this.prismaService.driver.findUnique({
+      where: {
+        email: loginRequest.email,
+      },
+    });
+
+    if (!driver) {
+      throw new HttpException('Email or password is invalid', 401);
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      loginRequest.password,
+      driver.password,
+    );
+
+    if (!isPasswordValid) {
+      throw new HttpException('Email or password is invalid', 401);
+    }
+
+    driver = await this.prismaService.driver.update({
+      where: {
+        email: loginRequest.email,
+      },
+      data: {
+        token: uuid(),
+      },
+    });
+
+    return this.toDriverResponse(driver);
+  }
+
+  async get(driver: driver): Promise<DriverResponse> {
+    this.logger.debug(`DriverService.Get ( ${JSON.stringify(driver)})`);
+    return this.toDriverResponse(driver);
+  }
+
+  async updateStatus(
+    driver: driver,
+    request: UpdateStatusRequest,
+  ): Promise<DriverResponse> {
+    this.logger.debug(
+      `DriverService.UpdateStatus(${JSON.stringify(driver)}, ${JSON.stringify(request)})`,
+    );
+    const updateStatusRequest: UpdateStatusRequest =
+      this.validationService.validate(DriverValidation.UPDATESTATUS, request);
+
+    if (updateStatusRequest.status) {
+      driver.status = updateStatusRequest.status;
+    }
+
+    const result = await this.prismaService.driver.update({
+      where: {
+        ktp: driver.ktp,
+      },
+      data: driver,
+    });
+
+    return this.toDriverResponse(result);
   }
 }

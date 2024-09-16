@@ -35,7 +35,19 @@ export class RegisterDriverRequest {
   @ApiProperty({ example: '4546221234822' })
   registration_number: string;
   @ApiProperty({ example: 'public/drivers/profile/PIM3606762101234.png' })
-  profil_img: string;
+  profile_img: string;
+}
+
+export class LoginDriverRequest {
+  @ApiProperty({ example: 'zen@example.com' })
+  email: string;
+  @ApiProperty({ example: 'test123' })
+  password: string;
+}
+
+export class UpdateStatusRequest {
+  @ApiProperty({ example: 'ACTIVE' })
+  status: StatusDriver;
 }
 
 export class DriverResponse {
@@ -55,7 +67,7 @@ export class DriverResponse {
   vehicle_color: string;
   license_plate: string;
   registration_number: string;
-  profil_img: string;
+  profile_img: string;
   ratings: number;
   total_earning: number;
   total_rides: number;

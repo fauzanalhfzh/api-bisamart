@@ -14,8 +14,16 @@ export class AuthMiddleware implements NestMiddleware {
         },
       });
 
+      const driver = await this.prismaService.driver.findFirst({
+        where: {
+          token: token,
+        },
+      });
+
       if (user) {
         req.user = user;
+      } else if (driver) {
+        req.driver = driver;
       }
     }
 

@@ -159,6 +159,52 @@ Response Body (Failed) :
 }
 ```
 
+## Update status driver
+
+Endpoint: PATCH /api/drivers/update-status
+
+Request Body :
+
+```json
+{
+  "status": "ACTIVE"
+}
+```
+
+Response Body (success) :
+
+```json
+{
+  "data": {
+    "name": "Zen",
+    "phone_number": "0812345",
+    "email": "test@example.com",
+    "country": "Indonesia",
+    "ktp": "367232145643",
+    "address_ktp": "Jl. Pasti ketemu",
+    "ktp_img": "public/drivers/ktp/SID33423123.png",
+    "vehicle_type": "MOTOR",
+    "sim": "765498743214",
+    "sim_img": "public/drivers/sim/SIM33423123.png",
+    "selfie_with_sim": "SEIM3606762101234.png",
+    "vehicle_brand": "Honda Beat",
+    "vehicle_color": "Biru Putih",
+    "license_plate": "DM 1243 AR",
+    "registration_number": "4546221234822",
+    "profil_img": "public/drivers/profile/PIM33423123.png",
+    "ratings": 0,
+    "total_earning": 0,
+    "total_rides": 0,
+    "pending_rides": 0,
+    "cancel_rides": 0,
+    "status": "ACTIVE",
+    "created_at": "22-09-2024",
+    "updated_at": "22-09-2024",
+    "token": "session_id_generated"
+  }
+}
+```
+
 ## Logout Drivers
 
 Endpoint: DELETE /api/drivers/current

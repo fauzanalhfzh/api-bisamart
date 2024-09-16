@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "driver" ALTER COLUMN "status" SET DEFAULT 'INACTIVE';
