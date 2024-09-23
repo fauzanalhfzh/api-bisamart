@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { WebResponse } from '../model/web.model';
-import { ApiOperation, ApiSecurity } from '@nestjs/swagger';
+import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import {
   LoginUserRequest,
   RegisterUserRequest,
@@ -18,7 +18,9 @@ import {
 } from '../model/user.model';
 import { Auth } from '../common/auth.decorator';
 import { user } from '@prisma/client';
+import { RidesResponse } from '../model/rides.model';
 
+@ApiTags('Users')
 @Controller('/api/users')
 export class UserController {
   constructor(private userService: UserService) {}
@@ -67,6 +69,19 @@ export class UserController {
     @Body() request: UpdateUserRequest,
   ): Promise<WebResponse<UserResponse>> {
     const result = await this.userService.update(user, request);
+    return {
+      data: result,
+    };
+  }
+
+  @Get('/get-rides')
+  @HttpCode(200)
+  @ApiSecurity('Authorization')
+  @ApiOperation({ summary: 'Get all rides history' })
+  async getAllRides(
+    @Auth() driver: any,
+  ): Promise<WebResponse<RidesResponse[]>> {
+    const result = await this.userService.getAllRides(driver);
     return {
       data: result,
     };

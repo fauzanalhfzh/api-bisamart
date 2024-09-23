@@ -3,9 +3,10 @@ import { CommonModule } from './common/common.module';
 import { UserModule } from './user/user.module';
 import { SimpleModule } from './simple/simple.module';
 import { DriverModule } from './driver/driver.module';
+import { RidesModule } from './rides/rides.module';
 
 @Module({
-  imports: [CommonModule, UserModule, SimpleModule, DriverModule],
+  imports: [CommonModule, UserModule, SimpleModule, DriverModule, RidesModule],
   controllers: [],
   providers: [],
 })

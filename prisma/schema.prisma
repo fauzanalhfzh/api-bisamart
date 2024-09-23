@@ -18,7 +18,7 @@ model user {
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
   token        String?
-  orders       orders[] @relation("user_orders")
+  rides        rides[]  @relation("user_rides")
 }
 
 enum VehicleType {
@@ -31,7 +31,7 @@ enum StatusDriver {
   ACTIVE
 }
 
-enum OrderStatus {
+enum RidesStatus {
   PENDING
   ACCEPTED
   COMPLETED
@@ -66,21 +66,21 @@ model driver {
   created_at          DateTime     @default(now())
   updated_at          DateTime     @updatedAt
   token               String?      @db.VarChar(100)
-  orders              orders[]     @relation("driver_orders")
+  rides               rides[]      @relation("driver_rides")
 }
 
-model orders {
+model rides {
   id                        Int         @id @default(autoincrement())
   user_id                   Int
   driver_id                 Int
   charge                    Float
   current_location_name     String
   destination_location_name String
-  distance                  String
-  status                    OrderStatus @default(PENDING)
+  distance                  Float
+  status                    RidesStatus @default(PENDING)
   rating                    Float?
-  user                      user        @relation("user_orders", fields: [user_id], references: [id])
-  driver                    driver      @relation("driver_orders", fields: [driver_id], references: [id])
-  cratedAt                  DateTime    @default(now())
-  updatedAt                 DateTime    @updatedAt
+  user                      user        @relation("user_rides", fields: [user_id], references: [id])
+  driver                    driver      @relation("driver_rides", fields: [driver_id], references: [id])
+  created_at                DateTime    @default(now())
+  updated_at                DateTime    @updatedAt
 }

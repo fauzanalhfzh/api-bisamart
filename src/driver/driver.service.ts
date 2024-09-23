@@ -11,8 +11,9 @@ import {
 } from '../model/driver.model';
 import { DriverValidation } from './driver.validation';
 import * as bcrypt from 'bcrypt';
-import { driver } from '@prisma/client';
+import { driver, rides } from '@prisma/client';
 import { v4 as uuid } from 'uuid';
+import { RidesResponse } from '../model/rides.model';
 
 @Injectable()
 export class DriverService {
@@ -148,6 +149,28 @@ export class DriverService {
     return this.toDriverResponse(driver);
   }
 
+  async checkDriverMustExists(ktp: string, id: number): Promise<driver> {
+    const driver = await this.prismaService.driver.findFirst({
+      where: {
+        ktp: ktp,
+        id: id,
+      },
+    });
+
+    if (!driver) {
+      throw new HttpException('driver is not found', 404);
+    }
+
+    return driver;
+  }
+
+  async getById(driver: driver, id: number): Promise<DriverResponse> {
+    this.logger.debug(`DriverService.GetbyId(${JSON.stringify(driver)})`);
+
+    const result = await this.checkDriverMustExists(driver.ktp, id);
+    return this.toDriverResponse(result);
+  }
+
   async updateStatus(
     driver: driver,
     request: UpdateStatusRequest,
@@ -170,5 +193,35 @@ export class DriverService {
     });
 
     return this.toDriverResponse(result);
+  }
+
+  async getAllRides(driver: driver): Promise<RidesResponse[]> {
+    this.logger.debug(`DriverService.getAllRides( ${JSON.stringify(driver)})`);
+
+    const data = await this.prismaService.rides.findMany({
+      where: {
+        driver_id: driver.id,
+      },
+      include: {
+        driver: true,
+        user: true,
+      },
+    });
+
+    const mappedData = data.map((ride) => ({
+      id: ride.id,
+      user_id: ride.user_id,
+      driver_id: ride.driver_id,
+      charge: ride.charge,
+      current_location_name: ride.current_location_name,
+      destination_location_name: ride.destination_location_name,
+      distance: ride.distance,
+      status: ride.status,
+      rating: ride.rating,
+      created_at: ride.created_at,
+      updated_at: ride.updated_at,
+    }));
+
+    return mappedData;
   }
 }

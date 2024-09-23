@@ -1,7 +1,8 @@
 import { Controller, Get, HttpCode } from '@nestjs/common';
 import { SimpleService } from './simple.service';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Test Connections')
 @Controller('/test')
 export class SimpleController {
   constructor(private simpleService: SimpleService) {}

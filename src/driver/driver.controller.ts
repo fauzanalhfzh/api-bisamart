@@ -3,34 +3,36 @@ import {
   Controller,
   Get,
   HttpCode,
+  Param,
+  ParseIntPipe,
   Patch,
   Post,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import { DriverService } from './driver.service';
-import { WebResponse } from 'src/model/web.model';
+import { WebResponse } from '../model/web.model';
 import {
   DriverResponse,
   LoginDriverRequest,
   RegisterDriverRequest,
   UpdateStatusRequest,
-} from 'src/model/driver.model';
+} from '../model/driver.model';
 import {
   ApiBody,
   ApiConsumes,
   ApiOperation,
   ApiSecurity,
+  ApiTags,
 } from '@nestjs/swagger';
-import {
-  FileFieldsInterceptor,
-  FilesInterceptor,
-} from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { Auth } from 'src/common/auth.decorator';
-import { driver } from '@prisma/client';
+import { Auth } from '../common/auth.decorator';
+import { driver, rides } from '@prisma/client';
+import { RidesResponse } from '../model/rides.model';
 
+@ApiTags('Drivers')
 @Controller('/api/drivers')
 export class DriverController {
   constructor(private driverService: DriverService) {}
@@ -133,6 +135,20 @@ export class DriverController {
     };
   }
 
+  @Get('/:id')
+  @HttpCode(200)
+  @ApiSecurity('Authorization')
+  @ApiOperation({ summary: 'Get driver by id' })
+  async getById(
+    @Auth() driver: driver,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<WebResponse<DriverResponse>> {
+    const result = await this.driverService.getById(driver, id);
+    return {
+      data: result,
+    };
+  }
+
   @Patch('/current')
   @HttpCode(200)
   @ApiSecurity('Authorization')
@@ -142,6 +158,19 @@ export class DriverController {
     @Body() request: UpdateStatusRequest,
   ): Promise<WebResponse<DriverResponse>> {
     const result = await this.driverService.updateStatus(driver, request);
+    return {
+      data: result,
+    };
+  }
+
+  @Get('/get-rides')
+  @HttpCode(200)
+  @ApiSecurity('Authorization')
+  @ApiOperation({ summary: 'Get all rides history' })
+  async getAllRides(
+    @Auth() driver: any,
+  ): Promise<WebResponse<RidesResponse[]>> {
+    const result = await this.driverService.getAllRides(driver);
     return {
       data: result,
     };

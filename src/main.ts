@@ -11,7 +11,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('BISADRIVE API DOCUMENTATION')
     .setDescription('API documentation for Bisa Service apps')
-    .setVersion('1.0')
+    .setVersion('1.2')
     .addApiKey(
       { type: 'apiKey', name: 'Authorization', in: 'header' },
       'Authorization',

@@ -19,10 +19,10 @@ export class LoginUserRequest {
 }
 
 export class UpdateUserRequest {
-  @ApiProperty({ example: 'updatepassword' })
-  password: string;
   @ApiProperty({ example: 'Zen tambah ganteng' })
-  name: string;
+  name?: string;
+  @ApiProperty({ example: 'updatepassword' })
+  password?: string;
 }
 
 export class UserResponse {

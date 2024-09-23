@@ -13,6 +13,7 @@ import { UserValidation } from './user.validation';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuid } from 'uuid';
 import { user } from '@prisma/client';
+import { RidesResponse } from '../model/rides.model';
 
 @Injectable()
 export class UserService {
@@ -154,6 +155,36 @@ export class UserService {
       created_at: user.created_at,
       updated_at: user.updated_at,
     };
+  }
+
+  async getAllRides(user: user): Promise<RidesResponse[]> {
+    this.logger.debug(`DriverService.getAllRides( ${JSON.stringify(user)})`);
+
+    const data = await this.prismaService.rides.findMany({
+      where: {
+        user_id: user.id,
+      },
+      include: {
+        driver: true,
+        user: true,
+      },
+    });
+
+    const mappedData = data.map((ride) => ({
+      id: ride.id,
+      user_id: ride.user_id,
+      driver_id: ride.driver_id,
+      charge: ride.charge,
+      current_location_name: ride.current_location_name,
+      destination_location_name: ride.destination_location_name,
+      distance: ride.distance,
+      status: ride.status,
+      rating: ride.rating,
+      created_at: ride.created_at,
+      updated_at: ride.updated_at,
+    }));
+
+    return mappedData;
   }
 
   async logout(user: user): Promise<UserResponse> {

@@ -16,15 +16,15 @@ export class RegisterDriverRequest {
   ktp: string;
   @ApiProperty({ example: 'Jl. pasti cepat sampai' })
   address_ktp: string;
-  @ApiProperty({ example: 'public/drivers/ktp/SID3606762101234.png' })
+  @ApiProperty({ example: 'SID3606762101234.png' })
   ktp_img: string;
   @ApiProperty({ example: VehicleType.MOTOR, enum: VehicleType })
   vehicle_type: VehicleType;
   @ApiProperty({ example: '720612346543' })
   sim: string;
-  @ApiProperty({ example: 'public/drivers/sim/SIM3606762101234.png' })
+  @ApiProperty({ example: 'SIM3606762101234.png' })
   sim_img: string;
-  @ApiProperty({ example: 'public/drivers/selfie/SEIM3606762101234.png' })
+  @ApiProperty({ example: 'SEIM3606762101234.png' })
   selfie_with_sim: string;
   @ApiProperty({ example: 'Honda Beat' })
   vehicle_brand: string;
@@ -34,7 +34,7 @@ export class RegisterDriverRequest {
   license_plate: string;
   @ApiProperty({ example: '4546221234822' })
   registration_number: string;
-  @ApiProperty({ example: 'public/drivers/profile/PIM3606762101234.png' })
+  @ApiProperty({ example: 'PIM3606762101234.png' })
   profile_img: string;
 }
 
