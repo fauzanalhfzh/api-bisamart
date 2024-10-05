@@ -51,7 +51,7 @@ export class UpdateStatusRequest {
 }
 
 export class DriverResponse {
-  id: number;
+  id: string;
   name: string;
   phone_number: string;
   email: string;

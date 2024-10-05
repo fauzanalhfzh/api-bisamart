@@ -11,7 +11,7 @@ import {
 } from '../model/driver.model';
 import { DriverValidation } from './driver.validation';
 import * as bcrypt from 'bcrypt';
-import { driver, rides } from '@prisma/client';
+import { Driver, Ride } from '@prisma/client';
 import { v4 as uuid } from 'uuid';
 import { RidesResponse } from '../model/rides.model';
 
@@ -23,7 +23,7 @@ export class DriverService {
     @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
   ) {}
 
-  toDriverResponse(driver: driver): DriverResponse {
+  toDriverResponse(driver: Driver): DriverResponse {
     const driverResponse: DriverResponse = {
       id: driver.id,
       name: driver.name,
@@ -144,12 +144,12 @@ export class DriverService {
     return this.toDriverResponse(driver);
   }
 
-  async get(driver: driver): Promise<DriverResponse> {
+  async get(driver: Driver): Promise<DriverResponse> {
     this.logger.debug(`DriverService.Get ( ${JSON.stringify(driver)})`);
     return this.toDriverResponse(driver);
   }
 
-  async checkDriverMustExists(ktp: string, id: number): Promise<driver> {
+  async checkDriverMustExists(ktp: string, id: string): Promise<Driver> {
     const driver = await this.prismaService.driver.findFirst({
       where: {
         ktp: ktp,
@@ -164,7 +164,7 @@ export class DriverService {
     return driver;
   }
 
-  async getById(driver: driver, id: number): Promise<DriverResponse> {
+  async getById(driver: Driver, id: string): Promise<DriverResponse> {
     this.logger.debug(`DriverService.GetbyId(${JSON.stringify(driver)})`);
 
     const result = await this.checkDriverMustExists(driver.ktp, id);
@@ -172,7 +172,7 @@ export class DriverService {
   }
 
   async updateStatus(
-    driver: driver,
+    driver: Driver,
     request: UpdateStatusRequest,
   ): Promise<DriverResponse> {
     this.logger.debug(
@@ -195,10 +195,10 @@ export class DriverService {
     return this.toDriverResponse(result);
   }
 
-  async getAllRides(driver: driver): Promise<RidesResponse[]> {
+  async getAllRides(driver: Driver): Promise<RidesResponse[]> {
     this.logger.debug(`DriverService.getAllRides( ${JSON.stringify(driver)})`);
 
-    const data = await this.prismaService.rides.findMany({
+    const data = await this.prismaService.ride.findMany({
       where: {
         driver_id: driver.id,
       },

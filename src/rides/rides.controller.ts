@@ -11,7 +11,7 @@ import { RidesService } from './rides.service';
 import { WebResponse } from '../model/web.model';
 import { RidesRequest, RidesResponse } from '../model/rides.model';
 import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
-import { driver } from '@prisma/client';
+import { Driver } from '@prisma/client';
 import { Auth } from '../common/auth.decorator';
 import { UpdateStatusRideRequest } from '../model/rides.model';
 import { PrismaService } from '../common/prisma.service';
@@ -41,10 +41,10 @@ export class RidesController {
   @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'Update status rides' })
   async updateStatus(
-    @Auth() driver: driver,
+    @Auth() driver: Driver,
     @Body() request: UpdateStatusRideRequest,
   ): Promise<WebResponse<RidesResponse>> {
-    const ride = await this.prismaService.rides.findUnique({
+    const ride = await this.prismaService.ride.findUnique({
       where: {
         id: request.id,
       },

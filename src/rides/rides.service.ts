@@ -9,7 +9,7 @@ import {
 } from '../model/rides.model';
 import { Logger } from 'winston';
 import { RidesValidation } from './rides.validation';
-import { driver, rides } from '@prisma/client';
+import { Driver, Ride } from '@prisma/client';
 
 @Injectable()
 export class RidesService {
@@ -27,20 +27,21 @@ export class RidesService {
       request,
     );
 
-    const baseDistance = 2; //minimal jarak
-    const baseCharge = 10000;
+    const baseDistance = 3; //minimal jarak
+    const baseCharge = 7000;
     const additionalChargePerKm = 1850;
+    const tax = 1500;
 
-    let totalCharge = baseCharge;
+    let totalCharge: number;
 
     if (ridesRequest.distance > baseDistance) {
       const additionalDistance = ridesRequest.distance - baseDistance; // Hitung jarak tambahan
       const additionalCharge = additionalDistance * additionalChargePerKm; // Kalkulasi biaya tambahan
       const roundedNearest = this.roundToNearest500(additionalCharge);
-      totalCharge += roundedNearest; // Tambahkan biaya tambahan ke biaya total
+      totalCharge = baseCharge + tax + roundedNearest; // Tambahkan biaya tambahan ke biaya total
     }
 
-    const rides = await this.prismaService.rides.create({
+    const rides = await this.prismaService.ride.create({
       data: {
         ...ridesRequest,
         charge: totalCharge,
@@ -51,8 +52,8 @@ export class RidesService {
   }
 
   async updateStatus(
-    driver: driver,
-    rides: rides,
+    driver: Driver,
+    rides: Ride,
     request: UpdateStatusRideRequest,
   ): Promise<RidesResponse> {
     this.logger.debug(
@@ -66,7 +67,7 @@ export class RidesService {
       rides.status = updateStatusRequest.status;
     }
 
-    const result = await this.prismaService.rides.update({
+    const result = await this.prismaService.ride.update({
       where: {
         id: rides.id,
       },
@@ -80,11 +81,12 @@ export class RidesService {
     return Math.round(value / 500) * 500;
   }
 
-  toRidesResponse(rides: rides): RidesResponse {
+  toRidesResponse(rides: Ride): RidesResponse {
     return {
       id: rides.id,
       user_id: rides.user_id,
       driver_id: rides.driver_id,
+      coupon_id: rides.coupon_id,
       charge: rides.charge,
       current_location_name: rides.current_location_name,
       destination_location_name: rides.destination_location_name,

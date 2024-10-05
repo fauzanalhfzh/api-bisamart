@@ -17,7 +17,7 @@ import {
   UserResponse,
 } from '../model/user.model';
 import { Auth } from '../common/auth.decorator';
-import { user } from '@prisma/client';
+import { User } from '@prisma/client';
 import { RidesResponse } from '../model/rides.model';
 
 @ApiTags('Users')
@@ -53,7 +53,7 @@ export class UserController {
   @HttpCode(200)
   @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'Get user data' })
-  async get(@Auth() user: user): Promise<WebResponse<UserResponse>> {
+  async get(@Auth() user: User): Promise<WebResponse<UserResponse>> {
     const result = await this.userService.get(user);
     return {
       data: result,
@@ -65,7 +65,7 @@ export class UserController {
   @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'Update data users' })
   async update(
-    @Auth() user: user,
+    @Auth() user: User,
     @Body() request: UpdateUserRequest,
   ): Promise<WebResponse<UserResponse>> {
     const result = await this.userService.update(user, request);
@@ -91,7 +91,7 @@ export class UserController {
   @HttpCode(200)
   @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'Logout users' })
-  async logout(@Auth() user: user): Promise<WebResponse<boolean>> {
+  async logout(@Auth() user: User): Promise<WebResponse<boolean>> {
     await this.userService.logout(user);
     return {
       data: true,

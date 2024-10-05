@@ -29,7 +29,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { Auth } from '../common/auth.decorator';
-import { driver, rides } from '@prisma/client';
+import { Driver } from '@prisma/client';
 import { RidesResponse } from '../model/rides.model';
 
 @ApiTags('Drivers')
@@ -128,7 +128,7 @@ export class DriverController {
   @HttpCode(200)
   @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'Get driver data' })
-  async get(@Auth() driver: driver): Promise<WebResponse<DriverResponse>> {
+  async get(@Auth() driver: Driver): Promise<WebResponse<DriverResponse>> {
     const result = await this.driverService.get(driver);
     return {
       data: result,
@@ -140,8 +140,8 @@ export class DriverController {
   @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'Get driver by id' })
   async getById(
-    @Auth() driver: driver,
-    @Param('id', ParseIntPipe) id: number,
+    @Auth() driver: Driver,
+    @Param('id', ParseIntPipe) id: string,
   ): Promise<WebResponse<DriverResponse>> {
     const result = await this.driverService.getById(driver, id);
     return {
@@ -154,7 +154,7 @@ export class DriverController {
   @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'Update driver status' })
   async updateStatus(
-    @Auth() driver: driver,
+    @Auth() driver: Driver,
     @Body() request: UpdateStatusRequest,
   ): Promise<WebResponse<DriverResponse>> {
     const result = await this.driverService.updateStatus(driver, request);

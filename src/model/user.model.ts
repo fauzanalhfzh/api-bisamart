@@ -26,12 +26,13 @@ export class UpdateUserRequest {
 }
 
 export class UserResponse {
-  id: number;
+  id: string;
   name: string;
   phone_number: string;
   email: string;
   ratings: number;
-  total_rides: number;
+  total_ride: number;
+  total_order: number;
   token?: string;
   created_at: Date;
   updated_at: Date;

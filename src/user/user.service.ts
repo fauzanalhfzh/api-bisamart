@@ -12,7 +12,7 @@ import { Logger } from 'winston';
 import { UserValidation } from './user.validation';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuid } from 'uuid';
-import { user } from '@prisma/client';
+import { User } from '@prisma/client';
 import { RidesResponse } from '../model/rides.model';
 
 @Injectable()
@@ -51,7 +51,8 @@ export class UserService {
       phone_number: user.phone_number,
       email: user.email,
       ratings: user.ratings,
-      total_rides: user.total_rides,
+      total_ride: user.total_ride,
+      total_order: user.total_order,
       created_at: user.created_at,
       updated_at: user.updated_at,
     };
@@ -100,13 +101,14 @@ export class UserService {
       name: user.name,
       token: user.token,
       ratings: user.ratings,
-      total_rides: user.total_rides,
+      total_ride: user.total_ride,
+      total_order: user.total_order,
       created_at: user.created_at,
       updated_at: user.updated_at,
     };
   }
 
-  async get(user: user): Promise<UserResponse> {
+  async get(user: User): Promise<UserResponse> {
     this.logger.debug(`UserService.Get ( ${JSON.stringify(user)})`);
     return {
       id: user.id,
@@ -114,13 +116,14 @@ export class UserService {
       phone_number: user.phone_number,
       name: user.name,
       ratings: user.ratings,
-      total_rides: user.total_rides,
+      total_ride: user.total_ride,
+      total_order: user.total_order,
       created_at: user.created_at,
       updated_at: user.updated_at,
     };
   }
 
-  async update(user: user, request: UpdateUserRequest): Promise<UserResponse> {
+  async update(user: User, request: UpdateUserRequest): Promise<UserResponse> {
     this.logger.debug(
       `UserService.Update(${JSON.stringify(user)}, ${JSON.stringify(request)})`,
     );
@@ -151,16 +154,17 @@ export class UserService {
       email: result.email,
       phone_number: result.phone_number,
       ratings: user.ratings,
-      total_rides: user.total_rides,
+      total_ride: user.total_ride,
+      total_order: user.total_order,
       created_at: user.created_at,
       updated_at: user.updated_at,
     };
   }
 
-  async getAllRides(user: user): Promise<RidesResponse[]> {
+  async getAllRides(user: User): Promise<RidesResponse[]> {
     this.logger.debug(`DriverService.getAllRides( ${JSON.stringify(user)})`);
 
-    const data = await this.prismaService.rides.findMany({
+    const data = await this.prismaService.ride.findMany({
       where: {
         user_id: user.id,
       },
@@ -187,7 +191,7 @@ export class UserService {
     return mappedData;
   }
 
-  async logout(user: user): Promise<UserResponse> {
+  async logout(user: User): Promise<UserResponse> {
     const result = await this.prismaService.user.update({
       where: {
         email: user.email,
@@ -203,7 +207,8 @@ export class UserService {
       phone_number: user.phone_number,
       name: user.phone_number,
       ratings: user.ratings,
-      total_rides: user.total_rides,
+      total_ride: user.total_ride,
+      total_order: user.total_order,
       created_at: user.created_at,
       updated_at: user.updated_at,
     };

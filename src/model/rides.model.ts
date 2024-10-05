@@ -1,11 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { RidesStatus } from '@prisma/client';
+import { OrderStatus } from '@prisma/client';
 
 export class RidesRequest {
-  @ApiProperty({ example: 1 })
-  user_id: number;
-  @ApiProperty({ example: 1 })
-  driver_id: number;
+  @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
+  user_id: string;
+  @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440213' })
+  driver_id: string;
+  @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440124' })
+  coupon_id?: string;
   @ApiProperty({ example: 'Janoor Coffe' })
   current_location_name: string;
   @ApiProperty({ example: 'Cilegon Center Mall' })
@@ -17,23 +19,23 @@ export class RidesRequest {
 }
 
 export class UpdateStatusRideRequest {
-  @ApiProperty({ example: 1 })
-  id: number;
+  @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
+  id: string;
   @ApiProperty({ example: 'ACCEPTED' })
-  status: RidesStatus;
+  status: OrderStatus;
 }
 
 export class RidesResponse {
-  id: number;
-  user_id: number;
-  driver_id: number;
+  id: string;
+  user_id: string;
+  driver_id: string;
+  coupon_id?: string;
   charge: number;
   current_location_name: string;
   destination_location_name: string;
   distance: number;
-  status: RidesStatus;
+  status: OrderStatus;
   rating?: number;
   created_at: Date;
   updated_at: Date;
 }
-
