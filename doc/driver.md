@@ -2,7 +2,7 @@
 
 ## Register Driver
 
-Endpoint POST /api/drivers
+Endpoint POST /api/auth/drivers
 
 Request Body :
 
@@ -64,7 +64,7 @@ Response Body (Failed) :
 
 ## Login User
 
-Endpoint : POST /api/drivers/login
+Endpoint : POST /api/auth/drivers/login
 
 Request Body :
 

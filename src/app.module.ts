@@ -4,9 +4,17 @@ import { UserModule } from './user/user.module';
 import { SimpleModule } from './simple/simple.module';
 import { DriverModule } from './driver/driver.module';
 import { RidesModule } from './rides/rides.module';
+import { MerchantModule } from './merchant/merchant.module';
 
 @Module({
-  imports: [CommonModule, UserModule, SimpleModule, DriverModule, RidesModule],
+  imports: [
+    CommonModule,
+    SimpleModule,
+    UserModule,
+    DriverModule,
+    RidesModule,
+    MerchantModule,
+  ],
   controllers: [],
   providers: [],
 })

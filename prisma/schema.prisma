@@ -134,6 +134,7 @@ model Merchant {
   open_time     String
   close_time    String
   status        UserStatus @default(INACTIVE)
+  token         String?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

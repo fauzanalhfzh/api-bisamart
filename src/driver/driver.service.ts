@@ -224,4 +224,17 @@ export class DriverService {
 
     return mappedData;
   }
+
+  async logout(driver: Driver): Promise<DriverResponse> {
+    const result = await this.prismaService.driver.update({
+      where: {
+        email: driver.email,
+      },
+      data: {
+        token: null,
+      },
+    });
+
+    return this.toDriverResponse(result);
+  }
 }

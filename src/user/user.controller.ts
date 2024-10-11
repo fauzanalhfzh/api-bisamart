@@ -25,7 +25,7 @@ import { RidesResponse } from '../model/rides.model';
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @Post()
+  @Post('/auth/register')
   @HttpCode(200)
   @ApiOperation({ summary: 'Register new user' })
   async register(
@@ -37,7 +37,7 @@ export class UserController {
     };
   }
 
-  @Post('/login')
+  @Post('/auth/login')
   @HttpCode(200)
   @ApiOperation({ summary: 'Login users' })
   async login(
@@ -87,7 +87,7 @@ export class UserController {
     };
   }
 
-  @Delete('/current')
+  @Delete('/auth/logout')
   @HttpCode(200)
   @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'Logout users' })

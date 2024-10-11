@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { StatusDriver, VehicleType } from '@prisma/client';
+import { UserStatus, VehicleType } from '@prisma/client';
 
 export class RegisterDriverRequest {
   @ApiProperty({ example: 'Zen driver' })
@@ -39,7 +39,7 @@ export class RegisterDriverRequest {
 }
 
 export class LoginDriverRequest {
-  @ApiProperty({ example: 'zen@example.com' })
+  @ApiProperty({ example: 'test@example.com' })
   email: string;
   @ApiProperty({ example: 'test123' })
   password: string;
@@ -47,7 +47,7 @@ export class LoginDriverRequest {
 
 export class UpdateStatusRequest {
   @ApiProperty({ example: 'ACTIVE' })
-  status: StatusDriver;
+  status: UserStatus;
 }
 
 export class DriverResponse {
@@ -73,7 +73,7 @@ export class DriverResponse {
   total_rides: number;
   pending_rides: number;
   cancel_rides: number;
-  status: StatusDriver;
+  status: UserStatus;
   created_at: Date;
   updated_at: Date;
   token?: string;

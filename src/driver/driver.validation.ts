@@ -1,4 +1,4 @@
-import { StatusDriver, VehicleType } from '@prisma/client';
+import { UserStatus, VehicleType } from '@prisma/client';
 import { z, ZodType } from 'zod';
 
 export class DriverValidation {
@@ -19,7 +19,7 @@ export class DriverValidation {
   });
 
   static readonly UPDATESTATUS: ZodType = z.object({
-    status: z.enum([StatusDriver.ACTIVE, StatusDriver.INACTIVE]),
+    status: z.enum([UserStatus.ACTIVE, UserStatus.INACTIVE]),
   });
 
   static readonly LOGIN: ZodType = z.object({

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Param,
@@ -37,7 +38,7 @@ import { RidesResponse } from '../model/rides.model';
 export class DriverController {
   constructor(private driverService: DriverService) {}
 
-  @Post()
+  @Post('/auth/register')
   @HttpCode(200)
   @ApiOperation({ summary: 'Register new driver' })
   @UseInterceptors(
@@ -112,7 +113,7 @@ export class DriverController {
     };
   }
 
-  @Post('/login')
+  @Post('/auth/login')
   @HttpCode(200)
   @ApiOperation({ summary: 'Login driver' })
   async login(
@@ -173,6 +174,17 @@ export class DriverController {
     const result = await this.driverService.getAllRides(driver);
     return {
       data: result,
+    };
+  }
+
+  @Delete('/auth/logout')
+  @HttpCode(200)
+  @ApiSecurity('Authorization')
+  @ApiOperation({ summary: 'Logout drivers' })
+  async logout(@Auth() driver: Driver): Promise<WebResponse<boolean>> {
+    await this.driverService.logout(driver);
+    return {
+      data: true,
     };
   }
 }
