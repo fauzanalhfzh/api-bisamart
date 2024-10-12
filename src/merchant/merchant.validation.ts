@@ -1,3 +1,4 @@
+import { UserStatus } from '@prisma/client';
 import { z, ZodType } from 'zod';
 
 export class MerchantValidation {
@@ -14,5 +15,22 @@ export class MerchantValidation {
   static readonly LOGIN: ZodType = z.object({
     email: z.string().min(1).max(50),
     password: z.string().min(1).max(100),
+  });
+  static readonly UPDATE: ZodType = z.object({
+    address: z.string().min(1).max(150),
+    open_time: z.string().min(1).max(10),
+    close_time: z.string().min(1).max(10),
+    password: z.string().min(1).max(100).optional(),
+  });
+  static readonly UPDATESTATUS: ZodType = z.object({
+    status: z.enum([UserStatus.ACTIVE, UserStatus.INACTIVE]),
+  });
+  static readonly CREATEPRODUCT: ZodType = z.object({
+    product_name: z.string().min(1).max(100),
+    description: z.string().min(1).max(150).optional(),
+    price: z.number().min(1),
+    stock: z.number().min(1),
+    category_id: z.string().min(1).max(100).optional(),
+    merchant_id: z.string().min(1).max(100),
   });
 }

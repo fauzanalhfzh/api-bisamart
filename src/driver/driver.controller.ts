@@ -34,7 +34,7 @@ import { Driver } from '@prisma/client';
 import { RidesResponse } from '../model/rides.model';
 
 @ApiTags('Drivers')
-@Controller('/api/drivers')
+@Controller('/api/v1/drivers')
 export class DriverController {
   constructor(private driverService: DriverService) {}
 

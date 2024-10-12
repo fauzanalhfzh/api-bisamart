@@ -17,7 +17,7 @@ import { UpdateStatusRideRequest } from '../model/rides.model';
 import { PrismaService } from '../common/prisma.service';
 
 @ApiTags('Rides')
-@Controller('api/rides')
+@Controller('api/v1/rides')
 export class RidesController {
   constructor(
     private ridesService: RidesService,

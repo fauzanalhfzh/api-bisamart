@@ -12,7 +12,7 @@ export class RegisterUserRequest {
 }
 
 export class LoginUserRequest {
-  @ApiProperty({ example: 'zen@example.com' })
+  @ApiProperty({ example: 'test@example.com' })
   email: string;
   @ApiProperty({ example: 'test123' })
   password: string;
@@ -33,7 +33,7 @@ export class UserResponse {
   ratings: number;
   total_ride: number;
   total_order: number;
-  token?: string;
   created_at: Date;
   updated_at: Date;
+  token?: string;
 }

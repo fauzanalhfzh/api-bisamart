@@ -9,10 +9,13 @@ export const Auth = createParamDecorator(
     const request = context.switchToHttp().getRequest();
     const user = request.user;
     const driver = request.driver;
+    const merchant = request.merchant;
     if (user) {
       return user;
     } else if (driver) {
       return driver;
+    } else if (merchant) {
+      return merchant;
     } else {
       throw new HttpException('Unauthorized', 401);
     }

@@ -14,6 +14,7 @@ import * as bcrypt from 'bcrypt';
 import { v4 as uuid } from 'uuid';
 import { User } from '@prisma/client';
 import { RidesResponse } from '../model/rides.model';
+import { promise } from 'zod';
 
 @Injectable()
 export class UserService {
@@ -22,6 +23,26 @@ export class UserService {
     private validationService: ValidationService,
     @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
   ) {}
+
+  toUserResponse(user: User): UserResponse {
+    const userResponse: UserResponse = {
+      id: user.id,
+      name: user.name,
+      phone_number: user.phone_number,
+      email: user.email,
+      ratings: user.ratings,
+      total_ride: user.total_ride,
+      total_order: user.total_order,
+      created_at: user.created_at,
+      updated_at: user.updated_at,
+    };
+
+    if (user.token) {
+      userResponse.token = user.token;
+    }
+
+    return userResponse;
+  }
 
   async register(request: RegisterUserRequest): Promise<UserResponse> {
     this.logger.debug(`UserService.register(${JSON.stringify(request)})`);
@@ -45,17 +66,7 @@ export class UserService {
       data: registerRequest,
     });
 
-    return {
-      id: user.id,
-      name: user.name,
-      phone_number: user.phone_number,
-      email: user.email,
-      ratings: user.ratings,
-      total_ride: user.total_ride,
-      total_order: user.total_order,
-      created_at: user.created_at,
-      updated_at: user.updated_at,
-    };
+    return this.toUserResponse(user);
   }
 
   async login(request: LoginUserRequest): Promise<UserResponse> {
@@ -94,33 +105,12 @@ export class UserService {
       },
     });
 
-    return {
-      id: user.id,
-      email: user.email,
-      phone_number: user.phone_number,
-      name: user.name,
-      token: user.token,
-      ratings: user.ratings,
-      total_ride: user.total_ride,
-      total_order: user.total_order,
-      created_at: user.created_at,
-      updated_at: user.updated_at,
-    };
+    return this.toUserResponse(user);
   }
 
   async get(user: User): Promise<UserResponse> {
     this.logger.debug(`UserService.Get ( ${JSON.stringify(user)})`);
-    return {
-      id: user.id,
-      email: user.email,
-      phone_number: user.phone_number,
-      name: user.name,
-      ratings: user.ratings,
-      total_ride: user.total_ride,
-      total_order: user.total_order,
-      created_at: user.created_at,
-      updated_at: user.updated_at,
-    };
+    return this.toUserResponse(user);
   }
 
   async update(user: User, request: UpdateUserRequest): Promise<UserResponse> {
@@ -148,17 +138,7 @@ export class UserService {
       data: user,
     });
 
-    return {
-      id: user.id,
-      name: result.name,
-      email: result.email,
-      phone_number: result.phone_number,
-      ratings: user.ratings,
-      total_ride: user.total_ride,
-      total_order: user.total_order,
-      created_at: user.created_at,
-      updated_at: user.updated_at,
-    };
+    return this.toUserResponse(result);
   }
 
   async getAllRides(user: User): Promise<RidesResponse[]> {
@@ -201,16 +181,6 @@ export class UserService {
       },
     });
 
-    return {
-      id: user.id,
-      email: user.email,
-      phone_number: user.phone_number,
-      name: user.phone_number,
-      ratings: user.ratings,
-      total_ride: user.total_ride,
-      total_order: user.total_order,
-      created_at: user.created_at,
-      updated_at: user.updated_at,
-    };
+    return this.toUserResponse(result);
   }
 }

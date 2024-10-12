@@ -21,7 +21,7 @@ import { User } from '@prisma/client';
 import { RidesResponse } from '../model/rides.model';
 
 @ApiTags('Users')
-@Controller('/api/users')
+@Controller('/api/v1/users')
 export class UserController {
   constructor(private userService: UserService) {}
 

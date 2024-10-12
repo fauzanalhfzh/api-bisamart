@@ -145,35 +145,45 @@ model Merchant {
 }
 
 model Product {
-  id           String @id @default(uuid())
+  id           String  @id @default(uuid())
   product_name String
-  description  String
+  description  String?
   price        Float
   stock        Int
-  category_id  String
   merchant_id  String
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  merchant Merchant   @relation("merchant_product", fields: [merchant_id], references: [id])
-  category Category[] @relation("category_product")
-  Item     Item[]     @relation("product_item")
+  merchant   Merchant          @relation("merchant_product", fields: [merchant_id], references: [id])
+  item       Item[]            @relation("product_item")
+  categories ProductCategory[] @relation("Product_to_category")
 
   @@map("products")
 }
 
 model Category {
-  id            String @id @default(uuid())
+  id            String  @id @default(uuid())
   category_name String
-  description   String
+  description   String?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  Product Product[] @relation("category_product")
+  products ProductCategory[] @relation("category_to_product")
 
   @@map("categories")
+}
+
+model ProductCategory {
+  product_id  String
+  category_id String
+
+  products   Product  @relation("Product_to_category", fields: [product_id], references: [id])
+  categories Category @relation("category_to_product", fields: [category_id], references: [id])
+
+  @@id([product_id, category_id])
+  @@map("pivot_productcategory")
 }
 
 model Order {
@@ -187,8 +197,8 @@ model Order {
   updated_at DateTime @updatedAt
 
   user    User      @relation("user_orders", fields: [user_id], references: [id])
-  Item    Item[]    @relation("orders_item")
-  Payment Payment[] @relation("payment_orders")
+  item    Item[]    @relation("orders_item")
+  payment Payment[] @relation("payment_orders")
 
   @@map("orders_mart")
 }

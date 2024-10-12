@@ -19,11 +19,26 @@ export class RegisterMerchantRequest {
   @ApiProperty({ example: '22:00' })
   close_time: string;
 }
-
 export class LoginMerchantRequest {
   @ApiProperty({ example: 'test@example.com' })
   email: string;
   @ApiProperty({ example: 'test123' })
+  password: string;
+}
+
+export class UpdateStatusRequest {
+  @ApiProperty({ example: 'ACTIVE' })
+  status: UserStatus;
+}
+
+export class UpdateMerchantRequest {
+  @ApiProperty({ example: 'Jalan pasti ketemu lagi update' })
+  address: string;
+  @ApiProperty({ example: '13:00' })
+  open_time: string;
+  @ApiProperty({ example: '20:00' })
+  close_time: string;
+  @ApiProperty({ example: 'test12345' })
   password: string;
 }
 
