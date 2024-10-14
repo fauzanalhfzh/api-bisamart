@@ -16,10 +16,10 @@ export class MerchantValidation {
     email: z.string().min(1).max(50),
     password: z.string().min(1).max(100),
   });
-  static readonly UPDATE: ZodType = z.object({
-    address: z.string().min(1).max(150),
-    open_time: z.string().min(1).max(10),
-    close_time: z.string().min(1).max(10),
+  static readonly UPDATE_MERCHANT: ZodType = z.object({
+    address: z.string().min(1).max(150).optional(),
+    open_time: z.string().min(1).max(10).optional(),
+    close_time: z.string().min(1).max(10).optional(),
     password: z.string().min(1).max(100).optional(),
   });
   static readonly UPDATESTATUS: ZodType = z.object({
@@ -32,5 +32,11 @@ export class MerchantValidation {
     stock: z.number().min(1),
     category_id: z.string().min(1).max(100).optional(),
     merchant_id: z.string().min(1).max(100),
+  });
+  static readonly UDPATE_PRODUCT: ZodType = z.object({
+    product_name: z.string().min(1).max(100).optional(),
+    description: z.string().min(1).max(150).optional(),
+    price: z.number().min(1).optional(),
+    stock: z.number().min(1).optional(),
   });
 }

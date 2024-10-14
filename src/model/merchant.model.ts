@@ -33,13 +33,13 @@ export class UpdateStatusRequest {
 
 export class UpdateMerchantRequest {
   @ApiProperty({ example: 'Jalan pasti ketemu lagi update' })
-  address: string;
+  address?: string;
   @ApiProperty({ example: '13:00' })
-  open_time: string;
+  open_time?: string;
   @ApiProperty({ example: '20:00' })
-  close_time: string;
+  close_time?: string;
   @ApiProperty({ example: 'test12345' })
-  password: string;
+  password?: string;
 }
 
 export class MerchantResponse {

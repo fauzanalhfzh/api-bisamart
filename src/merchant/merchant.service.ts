@@ -14,7 +14,11 @@ import { MerchantValidation } from './merchant.validation';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuid } from 'uuid';
 import { Merchant, Product } from '@prisma/client';
-import { CreateProductRequest, ProductResponse } from 'src/model/product.model';
+import {
+  CreateProductRequest,
+  ProductResponse,
+  UpdateProductRequest,
+} from 'src/model/product.model';
 
 @Injectable()
 export class MerchantService {
@@ -44,6 +48,51 @@ export class MerchantService {
     }
 
     return merchantResponse;
+  }
+
+  toProductResponse(product: Product): ProductResponse {
+    if (!product) {
+      throw new Error('Product is undefined or null');
+    }
+
+    return {
+      id: product.id,
+      product_name: product.product_name,
+      description: product.description,
+      price: product.price,
+      stock: product.stock,
+      merchant_id: product.merchant_id,
+      created_at: product.created_at,
+      updated_at: product.updated_at,
+    };
+  }
+
+  async checkMerchantMustExists(id: string): Promise<Merchant> {
+    const merchant = await this.prismaService.merchant.findFirst({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!merchant) {
+      throw new HttpException('Merchant is not found', 404);
+    }
+
+    return merchant;
+  }
+
+  async checkProductMustExists(id: string): Promise<Product> {
+    const product = await this.prismaService.product.findFirst({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!product) {
+      throw new HttpException('Product is not found', 404);
+    }
+
+    return product;
   }
 
   async register(request: RegisterMerchantRequest): Promise<MerchantResponse> {
@@ -125,7 +174,10 @@ export class MerchantService {
     );
 
     const updateRequest: UpdateMerchantRequest =
-      this.validationService.validate(MerchantValidation.UPDATE, request);
+      this.validationService.validate(
+        MerchantValidation.UPDATE_MERCHANT,
+        request,
+      );
 
     if (updateRequest.address) {
       merchant.address = updateRequest.address;
@@ -191,23 +243,6 @@ export class MerchantService {
     return this.toMerchantResponse(result);
   }
 
-  toProductResponse(product: Product): ProductResponse {
-    if (!product) {
-      throw new Error('Product is undefined or null');
-    }
-
-    return {
-      id: product.id,
-      product_name: product.product_name,
-      description: product.description,
-      price: product.price,
-      stock: product.stock,
-      merchant_id: product.merchant_id,
-      created_at: product.created_at,
-      updated_at: product.updated_at,
-    };
-  }
-
   async addProduct(
     merchant: Merchant,
     request: CreateProductRequest,
@@ -239,8 +274,74 @@ export class MerchantService {
     return result;
   }
 
-  async getProductByMerchantId() {}
-  async getProductById() {}
-  async editProduct() {}
+  async getProductByMerchantId(merchantId: string): Promise<ProductResponse[]> {
+    this.logger.debug(
+      `MartService.getProductByMerchantId(${JSON.stringify(merchantId)})`,
+    );
+
+    const merchant = await this.checkMerchantMustExists(merchantId);
+
+    const products = await this.prismaService.product.findMany({
+      where: {
+        merchant_id: merchant.id,
+      },
+    });
+
+    if (!products || products.length === 0) {
+      throw new HttpException('No products found for this merchant', 404);
+    }
+
+    const result = products.map((product) => this.toProductResponse(product));
+
+    return result;
+  }
+
+  async getProductById(id: string): Promise<ProductResponse> {
+    this.logger.debug(`MartService.getProductById(${JSON.stringify(id)})`);
+
+    const result = await this.checkProductMustExists(id);
+
+    return this.toProductResponse(result);
+  }
+
+  async editProduct(
+    product: Product,
+    request: UpdateProductRequest,
+  ): Promise<ProductResponse> {
+    this.logger.debug(
+      `UserService.Update(${JSON.stringify(product)}, ${JSON.stringify(request)})`,
+    );
+
+    const updateRequest: UpdateProductRequest = this.validationService.validate(
+      MerchantValidation.UDPATE_PRODUCT,
+      request,
+    );
+
+    if (updateRequest.product_name) {
+      product.product_name = updateRequest.product_name;
+    }
+
+    if (updateRequest.description) {
+      product.description = updateRequest.description;
+    }
+
+    if (updateRequest.price) {
+      product.price = updateRequest.price;
+    }
+
+    if (updateRequest.stock) {
+      product.stock = updateRequest.stock;
+    }
+
+    const result = await this.prismaService.product.update({
+      where: {
+        id: product.id,
+      },
+      data: product,
+    });
+
+    return this.toProductResponse(result);
+  }
+
   async deleteProduct() {}
 }

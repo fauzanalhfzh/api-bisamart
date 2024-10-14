@@ -142,7 +142,7 @@ export class DriverController {
   @ApiOperation({ summary: 'Get driver by id' })
   async getById(
     @Auth() driver: Driver,
-    @Param('id', ParseIntPipe) id: string,
+    @Param('id') id: string,
   ): Promise<WebResponse<DriverResponse>> {
     const result = await this.driverService.getById(driver, id);
     return {

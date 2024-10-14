@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  Param,
   Patch,
   Post,
 } from '@nestjs/common';
@@ -123,6 +124,30 @@ export class MerchantController {
     product: Product,
   ): Promise<WebResponse<ProductResponse[]>> {
     const result = await this.merchantService.getAllProduct(product);
+    return {
+      data: result,
+    };
+  }
+
+  @Get('/product/:id')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Get product by id' })
+  async getProductById(
+    @Param('id') id: string,
+  ): Promise<WebResponse<ProductResponse>> {
+    const result = await this.merchantService.getProductById(id);
+    return {
+      data: result,
+    };
+  }
+
+  @Get('/:id/product')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Get all product by merchant ID' })
+  async getProductByMerchantId(
+    @Param('id') id: string,
+  ): Promise<WebResponse<ProductResponse[]>> {
+    const result = await this.merchantService.getProductByMerchantId(id);
     return {
       data: result,
     };

@@ -13,6 +13,17 @@ export class CreateProductRequest {
   merchant_id: string;
 }
 
+export class UpdateProductRequest {
+  @ApiProperty({ example: 'Paku 9cm' })
+  product_name?: string;
+  @ApiProperty({ example: '2 kg khusus kayu' })
+  description?: string;
+  @ApiProperty({ example: 19000 })
+  price?: number;
+  @ApiProperty({ example: 35 })
+  stock?: number;
+}
+
 export class ProductResponse {
   id: string;
   product_name: string;
