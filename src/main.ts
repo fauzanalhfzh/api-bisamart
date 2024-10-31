@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as express from 'express';
 import { join } from 'path';
 
 async function bootstrap() {
@@ -19,12 +20,12 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api-docs', app, document);
+  SwaggerModule.setup('api', app, document);
 
   const logger = app.get(WINSTON_MODULE_NEST_PROVIDER);
   app.useLogger(logger);
 
-  app.useStaticAssets(join(__dirname, '..public'));
+  app.use('/public', express.static(join(process.cwd(), 'public')));
 
   await app.listen(3000);
 }

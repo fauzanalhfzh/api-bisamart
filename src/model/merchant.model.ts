@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { UserStatus } from '@prisma/client';
 
 export class RegisterMerchantRequest {
-  @ApiProperty({ example: 'Tri tunggal' })
+  @ApiProperty({ example: 'Kedai Merdeka' })
   name: string;
   @ApiProperty({ example: '0812345678' })
   phone_number: string;
@@ -10,8 +10,8 @@ export class RegisterMerchantRequest {
   email: string;
   @ApiProperty({ example: 'test123' })
   password: string;
-  @ApiProperty({ example: 'Kedai Merdeka' })
-  merchant_name: string;
+  @ApiProperty({ example: 'Tri Tunggal Putra' })
+  admin: string;
   @ApiProperty({ example: 'Jalan pasti ketemu lagi' })
   address: string;
   @ApiProperty({ example: '15:00' })
@@ -47,7 +47,7 @@ export class MerchantResponse {
   name: string;
   phone_number: string;
   email: string;
-  merchant_name: string;
+  admin: string;
   address: string;
   open_time: string;
   close_time: string;

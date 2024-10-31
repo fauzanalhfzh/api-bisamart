@@ -3,11 +3,11 @@ import { z, ZodType } from 'zod';
 
 export class MerchantValidation {
   static readonly REGISTER: ZodType = z.object({
-    name: z.string().min(1).max(100),
+    name: z.string().min(1).max(50),
     phone_number: z.string().min(1).max(50),
     email: z.string().min(1).max(50),
     password: z.string().min(1).max(50),
-    merchant_name: z.string().min(1).max(50),
+    admin: z.string().min(1).max(100),
     address: z.string().min(1).max(150),
     open_time: z.string().min(1).max(10),
     close_time: z.string().min(1).max(10),
@@ -26,12 +26,12 @@ export class MerchantValidation {
     status: z.enum([UserStatus.ACTIVE, UserStatus.INACTIVE]),
   });
   static readonly CREATEPRODUCT: ZodType = z.object({
-    product_name: z.string().min(1).max(100),
+    name: z.string().min(1).max(100),
     description: z.string().min(1).max(150).optional(),
     price: z.number().min(1),
     stock: z.number().min(1),
-    category_id: z.string().min(1).max(100).optional(),
-    merchant_id: z.string().min(1).max(100),
+    merchant_id: z.string().min(1).max(150),
+    category_id: z.string().min(1).max(150),
   });
   static readonly UDPATE_PRODUCT: ZodType = z.object({
     product_name: z.string().min(1).max(100).optional(),

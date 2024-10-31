@@ -109,7 +109,7 @@ model Ride {
 
 model Coupon {
   id              String   @id @default(uuid())
-  coupon_name     String?
+  name            String?
   coupon_code     String
   discount_amount Float
   expiration_date DateTime
@@ -124,17 +124,17 @@ model Coupon {
 }
 
 model Merchant {
-  id            String     @id @default(uuid())
-  name          String
-  phone_number  String     @unique
-  email         String     @unique
-  password      String
-  merchant_name String
-  address       String
-  open_time     String
-  close_time    String
-  status        UserStatus @default(INACTIVE)
-  token         String?
+  id           String     @id @default(uuid())
+  name         String
+  phone_number String     @unique
+  email        String     @unique
+  password     String
+  admin        String
+  address      String
+  open_time    String
+  close_time   String
+  status       UserStatus @default(INACTIVE)
+  token        String?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -145,45 +145,35 @@ model Merchant {
 }
 
 model Product {
-  id           String  @id @default(uuid())
-  product_name String
-  description  String?
-  price        Float
-  stock        Int
-  merchant_id  String
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  image       String
+  price       Float
+  stock       Int
+  merchant_id String
+  category_id String
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  merchant   Merchant          @relation("merchant_product", fields: [merchant_id], references: [id])
-  item       Item[]            @relation("product_item")
-  categories ProductCategory[] @relation("Product_to_category")
+  merchant Merchant @relation("merchant_product", fields: [merchant_id], references: [id])
+  category Category @relation("product_category", fields: [category_id], references: [id])
+  item     Item[]   @relation("product_item")
 
   @@map("products")
 }
 
 model Category {
-  id            String  @id @default(uuid())
-  category_name String
-  description   String?
+  id   String @id @default(uuid())
+  name String @unique
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  products ProductCategory[] @relation("category_to_product")
+  product Product[] @relation("product_category")
 
   @@map("categories")
-}
-
-model ProductCategory {
-  product_id  String
-  category_id String
-
-  products   Product  @relation("Product_to_category", fields: [product_id], references: [id])
-  categories Category @relation("category_to_product", fields: [category_id], references: [id])
-
-  @@id([product_id, category_id])
-  @@map("pivot_productcategory")
 }
 
 model Order {

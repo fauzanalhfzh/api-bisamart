@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../src/common/prisma.service';
 import * as bcrypt from 'bcrypt';
-import { driver, user } from '@prisma/client';
+import { Driver, User } from '@prisma/client';
 
 @Injectable()
 export class TestService {
@@ -15,7 +15,7 @@ export class TestService {
     });
   }
 
-  async getUser(): Promise<user> {
+  async getUser(): Promise<User> {
     return await this.prismaService.user.findUnique({
       where: {
         email: 'test',
@@ -35,7 +35,7 @@ export class TestService {
     });
   }
 
-  async getDriver(): Promise<driver> {
+  async getDriver(): Promise<Driver> {
     return await this.prismaService.driver.findUnique({
       where: {
         ktp: 'test',

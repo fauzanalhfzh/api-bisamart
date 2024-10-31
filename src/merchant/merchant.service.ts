@@ -34,7 +34,7 @@ export class MerchantService {
       name: merchant.name,
       phone_number: merchant.phone_number,
       email: merchant.email,
-      merchant_name: merchant.merchant_name,
+      admin: merchant.admin,
       address: merchant.address,
       open_time: merchant.open_time,
       close_time: merchant.close_time,
@@ -57,11 +57,13 @@ export class MerchantService {
 
     return {
       id: product.id,
-      product_name: product.product_name,
+      name: product.name,
       description: product.description,
+      image: product.image,
       price: product.price,
       stock: product.stock,
       merchant_id: product.merchant_id,
+      category_id: product.category_id,
       created_at: product.created_at,
       updated_at: product.updated_at,
     };
@@ -160,9 +162,9 @@ export class MerchantService {
     return this.toMerchantResponse(merchant);
   }
 
-  async get(merhcant: Merchant): Promise<MerchantResponse> {
-    this.logger.debug(`MerchantService.Get( ${JSON.stringify(merhcant)})`);
-    return this.toMerchantResponse(merhcant);
+  async get(merchant: Merchant): Promise<MerchantResponse> {
+    this.logger.debug(`MerchantService.Get( ${JSON.stringify(merchant)})`);
+    return this.toMerchantResponse(merchant);
   }
 
   async update(
@@ -243,43 +245,68 @@ export class MerchantService {
     return this.toMerchantResponse(result);
   }
 
-  async addProduct(
+  async createProduct(
     merchant: Merchant,
     request: CreateProductRequest,
+    file?: Express.Multer.File,
   ): Promise<ProductResponse> {
     this.logger.debug(
       `MartService.create-product(${JSON.stringify(merchant)}, ${JSON.stringify(request)})`,
     );
+
+    // Pastikan stock adalah number
+    if (typeof request.stock !== 'number') {
+      request.stock = parseInt(request.stock as unknown as string, 10);
+      if (isNaN(request.stock)) {
+        throw new Error('Stock harus berupa angka.');
+      }
+    }
+
+    // Pastikan price adalah number
+    if (typeof request.price !== 'number') {
+      request.price = parseFloat(request.price as unknown as string);
+      if (isNaN(request.price)) {
+        throw new Error('Price harus berupa angka.');
+      }
+    }
 
     const createRequest: CreateProductRequest = this.validationService.validate(
       MerchantValidation.CREATEPRODUCT,
       request,
     );
 
+    const imageUrl = `/public/products/${file.filename}`;
+
     const product = await this.prismaService.product.create({
-      data: createRequest,
+      data: {
+        name: createRequest.name,
+        description: createRequest.description,
+        image: imageUrl,
+        price: createRequest.price,
+        stock: createRequest.stock,
+        merchant_id: createRequest.merchant_id,
+        category_id: createRequest.category_id,
+      },
     });
 
     return this.toProductResponse(product);
   }
 
-  async getAllProduct(product: Product): Promise<ProductResponse[]> {
-    this.logger.debug(`MartService.getAllProduct(${JSON.stringify(product)})`);
+  async getAllProduct(): Promise<ProductResponse[]> {
+    this.logger.debug(`MartService.getAllProduct()`);
 
     const products = await this.prismaService.product.findMany();
 
     // convert to array
-    const result = products.map((product) => this.toProductResponse(product));
-
-    return result;
+    return products.map((product) => this.toProductResponse(product));
   }
 
-  async getProductByMerchantId(merchantId: string): Promise<ProductResponse[]> {
+  async getProductByMerchantId(id: string): Promise<ProductResponse[]> {
     this.logger.debug(
-      `MartService.getProductByMerchantId(${JSON.stringify(merchantId)})`,
+      `MartService.getProductByMerchantId(${JSON.stringify(id)})`,
     );
 
-    const merchant = await this.checkMerchantMustExists(merchantId);
+    const merchant = await this.checkMerchantMustExists(id);
 
     const products = await this.prismaService.product.findMany({
       where: {
@@ -291,9 +318,7 @@ export class MerchantService {
       throw new HttpException('No products found for this merchant', 404);
     }
 
-    const result = products.map((product) => this.toProductResponse(product));
-
-    return result;
+    return products.map((product) => this.toProductResponse(product));
   }
 
   async getProductById(id: string): Promise<ProductResponse> {
@@ -304,6 +329,8 @@ export class MerchantService {
     return this.toProductResponse(result);
   }
 
+  async getProductByCategory() {}
+
   async editProduct(
     product: Product,
     request: UpdateProductRequest,
@@ -312,13 +339,29 @@ export class MerchantService {
       `UserService.Update(${JSON.stringify(product)}, ${JSON.stringify(request)})`,
     );
 
+    // Pastikan stock adalah number
+    if (typeof request.stock !== 'number') {
+      request.stock = parseInt(request.stock as unknown as string, 10);
+      if (isNaN(request.stock)) {
+        throw new Error('Stock harus berupa angka.');
+      }
+    }
+
+    // Pastikan price adalah number
+    if (typeof request.price !== 'number') {
+      request.price = parseFloat(request.price as unknown as string);
+      if (isNaN(request.price)) {
+        throw new Error('Price harus berupa angka.');
+      }
+    }
+
     const updateRequest: UpdateProductRequest = this.validationService.validate(
       MerchantValidation.UDPATE_PRODUCT,
       request,
     );
 
-    if (updateRequest.product_name) {
-      product.product_name = updateRequest.product_name;
+    if (updateRequest.name) {
+      product.name = updateRequest.name;
     }
 
     if (updateRequest.description) {
@@ -343,5 +386,17 @@ export class MerchantService {
     return this.toProductResponse(result);
   }
 
-  async deleteProduct() {}
+  async deleteProductById(id: string): Promise<ProductResponse> {
+    this.logger.debug(`MartService.deleteProductById(${JSON.stringify(id)})`);
+
+    const product = await this.checkProductMustExists(id);
+
+    const result = await this.prismaService.product.delete({
+      where: {
+        id: product.id,
+      },
+    });
+
+    return this.toProductResponse(result);
+  }
 }

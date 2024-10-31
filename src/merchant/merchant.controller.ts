@@ -7,6 +7,8 @@ import {
   Param,
   Patch,
   Post,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { MerchantService } from './merchant.service';
 import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
@@ -18,11 +20,14 @@ import {
   UpdateStatusRequest,
 } from 'src/model/merchant.model';
 import { WebResponse } from 'src/model/web.model';
-import { Merchant, Product } from '@prisma/client';
+import { Merchant } from '@prisma/client';
 import { Auth } from 'src/common/auth.decorator';
 import { CreateProductRequest, ProductResponse } from 'src/model/product.model';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname, join } from 'path';
 
-@ApiTags('Merhcant')
+@ApiTags('Merchant')
 @Controller('api/v1/merchant')
 export class MerchantController {
   constructor(private merchantService: MerchantService) {}
@@ -107,11 +112,27 @@ export class MerchantController {
   @HttpCode(200)
   @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'Create new product' })
-  async addProduct(
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: join(process.cwd(), 'public/products'),
+        filename: (req, file, cb) => {
+          const filename = `PR${Date.now()}` + extname(file.originalname);
+          cb(null, filename);
+        },
+      }),
+    }),
+  )
+  async createProduct(
     @Auth() merchant: Merchant,
     @Body() request: CreateProductRequest,
+    @UploadedFile() file: Express.Multer.File,
   ): Promise<WebResponse<ProductResponse>> {
-    const result = await this.merchantService.addProduct(merchant, request);
+    const result = await this.merchantService.createProduct(
+      merchant,
+      request,
+      file,
+    );
     return {
       data: result,
     };
@@ -120,10 +141,8 @@ export class MerchantController {
   @Get('/product')
   @HttpCode(200)
   @ApiOperation({ summary: 'Get all product' })
-  async getAllProduct(
-    product: Product,
-  ): Promise<WebResponse<ProductResponse[]>> {
-    const result = await this.merchantService.getAllProduct(product);
+  async getAllProduct(): Promise<WebResponse<ProductResponse[]>> {
+    const result = await this.merchantService.getAllProduct();
     return {
       data: result,
     };
@@ -150,6 +169,19 @@ export class MerchantController {
     const result = await this.merchantService.getProductByMerchantId(id);
     return {
       data: result,
+    };
+  }
+
+  @Delete('/product/:id')
+  @HttpCode(200)
+  @ApiSecurity('Authorization')
+  @ApiOperation({ summary: 'Delete product by id' })
+  async deleteProductById(
+    @Param('id') id: string,
+  ): Promise<WebResponse<boolean>> {
+    await this.merchantService.deleteProductById(id);
+    return {
+      data: true,
     };
   }
 }
