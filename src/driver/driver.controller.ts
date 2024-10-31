@@ -63,8 +63,26 @@ export class DriverController {
             }
           },
           filename: (req, file, cb) => {
-            const randomName = Date.now() + extname(file.originalname);
-            cb(null, randomName);
+            const timestamp = Date.now();
+            let prefix = '';
+
+            switch (file.fieldname) {
+              case 'ktp_img':
+                prefix = 'KTP';
+                break;
+              case 'sim_img':
+                prefix = 'SIM';
+                break;
+              case 'selfie_with_sim':
+                prefix = 'SEIM';
+                break;
+              case 'profile_img':
+                prefix = 'PIM';
+                break;
+            }
+
+            const filename = `${prefix}${timestamp}${extname(file.originalname)}`;
+            cb(null, filename);
           },
         }),
       },
