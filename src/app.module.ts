@@ -15,7 +15,7 @@ import { ProductModule } from './product/product.module';
     DriverModule,
     RidesModule,
     MerchantModule,
-    ProductModule
+    ProductModule,
   ],
   controllers: [],
   providers: [],

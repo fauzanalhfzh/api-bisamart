@@ -40,4 +40,3 @@ export class ProductValidation {
     stock: z.number().min(1).optional(),
   });
 }
-
