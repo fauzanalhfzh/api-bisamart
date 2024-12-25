@@ -32,119 +32,142 @@ enum StatusPayment {
 }
 
 model User {
-  id            String  @id @default(uuid())
-  name          String
-  email         String  @unique
-  phone_number  String  @unique
-  password      String
-  
-  address       String
-  
-  ratings       Float   @default(0)
-  total_order   Float   @default(0)
+  id           String @id @default(uuid())
+  name         String
+  email        String @unique
+  phone_number String @unique
+  password     String
+
+  ratings       Float @default(0)
+  total_order   Float @default(0)
   pending_order Float @default(0)
   cancel_order  Float @default(0)
-  
-  token         String?
 
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
+  token String?
 
-  Order Order[] @relation("user_orders")
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  Order     Order[]   @relation("user_orders")
+  Addresses Address[] @relation("user_address")
 
   @@map("users")
 }
 
 model Merchant {
-  id                String     @id @default(uuid())
-  name              String
-  email             String     @unique
-  phone_number      String     @unique
-  password          String
+  id           String @id @default(uuid())
+  name         String
+  email        String @unique
+  phone_number String @unique
+  password     String
 
-  ktp               String
-  ktp_url           String
-  place_of_birth    String
-  date_of_birth     DateTime
-  address_ktp       String
-  self_photo        String
+  ktp            String
+  ktp_url        String
+  place_of_birth String
+  date_of_birth  DateTime
+  address_ktp    String
+  self_photo_url String
 
-  bank_name         String
-  account_number    String
-  owner_name        String
-  saving_book_url   String?
-  
-  status            MerchantStatus @default(TUTUP)
-  
-  merchant_address  String
+  bank_name       String
+  account_number  String
+  owner_name      String
+  saving_book_url String?
+
+  status MerchantStatus @default(TUTUP)
+
   merchant_name     String
   category_merchant String
-  
-  ratings           Float       @default(0)
-  total_earning     Float       @default(0)
-  total_order       Float       @default(0)
-  pending_order     Float       @default(0)
-  cancel_order      Float       @default(0)
-  
-  token             String?
+
+  address_line String
+  city         String
+  state        String
+  postal_code  String
+  latitude     Float?
+  longitude    Float?
+
+  ratings       Float @default(0)
+  total_earning Float @default(0)
+  total_order   Float @default(0)
+  pending_order Float @default(0)
+  cancel_order  Float @default(0)
+
+  token String?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   operating_hours MerchantOperatingHours[] @relation("operating_hours")
-  product Product[] @relation("merchant_product")
+  product         Product[]                @relation("merchant_product")
 
   @@map("merchants")
 }
 
-model Kurir {
-  id                  String      @id @default(uuid())
-  name                String
-  email               String      @unique
-  phone_number        String      @unique
-  password            String
-  
+model Courier {
+  id           String @id @default(uuid())
+  name         String
+  email        String @unique
+  phone_number String @unique
+  password     String
+
   address_ktp         String
   ktp                 String
   ktp_url             String
   selfie_with_sim_url String
   profile_url         String
-  
+
   vehicle_brand       String
   vehicle_color       String
-  vehicle_speed       String
+  vehicle_speed       Int
   registration_number String
   license_plate       String
   license_url         String
-  
-  status              KurirStatus @default(OFFLINE)
-  
-  ratings             Float       @default(0)
-  total_earning       Float       @default(0)
-  total_rides         Float       @default(0)
-  pending_rides       Float       @default(0)
-  cancel_rides        Float       @default(0)
-  
-  token               String?     @db.VarChar(100)
+
+  status KurirStatus @default(OFFLINE)
+
+  ratings       Float @default(0)
+  total_earning Float @default(0)
+  total_rides   Float @default(0)
+  pending_rides Float @default(0)
+  cancel_rides  Float @default(0)
+
+  token String? @db.VarChar(100)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  @@map("drivers")
+  @@map("couriers")
 }
 
-model MerchantOperatingHours{
-  id          String @id @default(uuid())
+model Address {
+  id           String   @id @default(uuid())
+  user_id      String
+  address_line String
+  city         String
+  state        String
+  postal_code  String
+  latitude     Float?
+  longitude    Float?
+  is_primary   Boolean
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  user User @relation("user_address", fields: [user_id], references: [id])
+
+  @@map("addresses")
+}
+
+model MerchantOperatingHours {
+  id          String  @id @default(uuid())
   merchant_id String
   day_of_week String
   is_24_hours Boolean @default(false)
   open_time   String
   close_time  String
 
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  merchant Merchant @relation("operating_hours", fields: [merchant_id],references: [id])
+  merchant Merchant @relation("operating_hours", fields: [merchant_id], references: [id])
 
   @@map("merchant_operating_hours")
 }
@@ -157,10 +180,10 @@ model Coupon {
   expiration_date DateTime
   usage_limit     Int
 
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  order Order[]   @relation("coupon_order"  )
+  order Order[] @relation("coupon_order")
 
   @@map("coupons")
 }
@@ -171,12 +194,12 @@ model Product {
   name        String
   description String?
 
-  price       Float
-  stock       Int
-  netto       Int
+  price Float
+  stock Int
+  netto Int
 
-  discount    Int
-  
+  discount Int?
+
   merchant_id String
   category_id String
 
@@ -191,13 +214,13 @@ model Product {
 }
 
 model Category {
-  id          String @id @default(uuid())
+  id String @id @default(uuid())
 
-  name        String @unique
+  name        String  @unique
   description String?
 
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   product Product[] @relation("product_category")
 
@@ -205,22 +228,22 @@ model Category {
 }
 
 model Order {
-  id                String      @id @default(uuid())
-  user_id           String
-  driver_id         String
-  coupon_id         String
-  charge            Float
-  pickup_name       String
-  destination_name  String
-  distance          String
-  status            OrderStatus @default(PENDING)
+  id               String      @id @default(uuid())
+  user_id          String
+  driver_id        String
+  coupon_id        String
+  charge           Float
+  pickup_name      String
+  destination_name String
+  distance         String
+  status           OrderStatus @default(PENDING)
 
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   user    User      @relation("user_orders", fields: [user_id], references: [id])
   item    Item[]    @relation("orders_item")
-  coupon Coupon?    @relation("coupon_order", fields: [coupon_id], references: [id])
+  coupon  Coupon?   @relation("coupon_order", fields: [coupon_id], references: [id])
   payment Payment[] @relation("payment_orders")
 
   @@map("orders")
@@ -255,4 +278,6 @@ model Payment {
   updated_at DateTime @updatedAt
 
   order Order @relation("payment_orders", fields: [order_id], references: [id])
+
+  @@map("payment")
 }
