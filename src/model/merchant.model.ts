@@ -1,24 +1,57 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserStatus } from '@prisma/client';
+import { MerchantStatus } from '@prisma/client';
 
 export class RegisterMerchantRequest {
   @ApiProperty({ example: 'Kedai Merdeka' })
   name: string;
-  @ApiProperty({ example: '0812345678' })
-  phone_number: string;
   @ApiProperty({ example: 'test@example.com' })
   email: string;
+  @ApiProperty({ example: '0812345678' })
+  phone_number: string;
   @ApiProperty({ example: 'test123' })
   password: string;
-  @ApiProperty({ example: 'Tri Tunggal Putra' })
-  admin: string;
-  @ApiProperty({ example: 'Jalan pasti ketemu lagi' })
-  address: string;
+  @ApiProperty({ example: '3606762101234' })
+  ktp: string;
+  @ApiProperty({ example: '' })
+  ktp_url: string;
+  @ApiProperty({ example: 'Cilegon' })
+  place_of_birth: string;
+  @ApiProperty({ example: '2024-12-25' })
+  date_of_birth: Date;
   @ApiProperty({ example: '15:00' })
-  open_time: string;
-  @ApiProperty({ example: '22:00' })
-  close_time: string;
+  address_ktp: string;
+  @ApiProperty({ example: '' })
+  self_photo_url: string;
+  @ApiProperty({ example: 'BCA' })
+  bank_name: string;
+  @ApiProperty({ example: '43221234' })
+  account_number: string;
+  @ApiProperty({ example: 'John Doe' })
+  owner_name: string;
+  @ApiProperty({ example: '' })
+  category_merchant: string;
+  @ApiProperty({ example: 'public/' })
+  saving_book_url?: string;
+  @ApiProperty({
+    example: [MerchantStatus.BUKA, MerchantStatus.TAHAN, MerchantStatus.TUTUP],
+  })
+  @ApiProperty({ example: 'Rumah Makan Abang Ipan' })
+  merchant_name: string;
+  status: MerchantStatus;
+  @ApiProperty({ example: 'Jalan Jenderal Sudirman No. 10' })
+  address_line: string;
+  @ApiProperty({ example: 'Cilegon' })
+  city: string;
+  @ApiProperty({ example: 'Banten' })
+  state: string;
+  @ApiProperty({ example: '42415' })
+  postal_code: string;
+  @ApiProperty({ example: -6.21462 })
+  latitude?: number;
+  @ApiProperty({ example: 106.84513 })
+  longitude?: number;
 }
+
 export class LoginMerchantRequest {
   @ApiProperty({ example: 'test@example.com' })
   email: string;
@@ -27,32 +60,50 @@ export class LoginMerchantRequest {
 }
 
 export class UpdateStatusRequest {
-  @ApiProperty({ example: 'ACTIVE' })
-  status: UserStatus;
-}
-
-export class UpdateMerchantRequest {
-  @ApiProperty({ example: 'Jalan pasti ketemu lagi update' })
-  address?: string;
-  @ApiProperty({ example: '13:00' })
-  open_time?: string;
-  @ApiProperty({ example: '20:00' })
-  close_time?: string;
-  @ApiProperty({ example: 'test12345' })
-  password?: string;
+  @ApiProperty({
+    example: [MerchantStatus.BUKA, MerchantStatus.TAHAN, MerchantStatus.TUTUP],
+  })
+  status: MerchantStatus;
 }
 
 export class MerchantResponse {
   id: string;
   name: string;
-  phone_number: string;
   email: string;
-  admin: string;
-  address: string;
-  open_time: string;
-  close_time: string;
-  status: UserStatus;
+  phone_number: string;
+
+  ktp: string;
+  ktp_url: string;
+  place_of_birth: string;
+  date_of_birth: Date;
+  address_ktp: string;
+  self_photo_url: string;
+
+  bank_name: string;
+  account_number: string;
+  owner_name: string;
+  saving_book_url: string;
+
+  status: MerchantStatus;
+
+  merchant_name: string;
+  category_merchant: string;
+
+  address_line: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  latitude?: number;
+  longitude?: number;
+
+  ratings: number;
+  total_earning: number;
+  total_order: number;
+  pending_order: number;
+  cancel_order: number;
+
   created_at: Date;
   updated_at: Date;
+
   token?: string;
 }

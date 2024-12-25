@@ -7,7 +7,6 @@ import {
   LoginMerchantRequest,
   MerchantResponse,
   RegisterMerchantRequest,
-  UpdateMerchantRequest,
   UpdateStatusRequest,
 } from '../model/merchant.model';
 import { MerchantValidation } from './merchant.validation';
@@ -28,13 +27,32 @@ export class MerchantService {
     const merchantResponse: MerchantResponse = {
       id: merchant.id,
       name: merchant.name,
-      phone_number: merchant.phone_number,
       email: merchant.email,
-      admin: merchant.admin,
-      address: merchant.address,
-      open_time: merchant.open_time,
-      close_time: merchant.close_time,
+      phone_number: merchant.phone_number,
+      ktp: merchant.ktp,
+      ktp_url: merchant.ktp_url,
+      place_of_birth: merchant.place_of_birth,
+      date_of_birth: merchant.date_of_birth,
+      address_ktp: merchant.address_ktp,
+      self_photo_url: merchant.self_photo_url,
+      bank_name: merchant.bank_name,
+      account_number: merchant.account_number,
+      owner_name: merchant.owner_name,
+      saving_book_url: merchant.saving_book_url,
       status: merchant.status,
+      merchant_name: merchant.merchant_name,
+      category_merchant: merchant.category_merchant,
+      address_line: merchant.address_line,
+      city: merchant.city,
+      state: merchant.state,
+      postal_code: merchant.postal_code,
+      latitude: merchant.latitude,
+      longitude: merchant.longitude,
+      ratings: merchant.ratings,
+      total_earning: merchant.total_earning,
+      total_order: merchant.total_order,
+      pending_order: merchant.pending_order,
+      cancel_order: merchant.cancel_order,
       created_at: merchant.created_at,
       updated_at: merchant.updated_at,
     };
@@ -53,11 +71,13 @@ export class MerchantService {
 
     return {
       id: product.id,
+      image_url: product.image_url,
       name: product.name,
       description: product.description,
-      image: product.image,
       price: product.price,
       stock: product.stock,
+      netto: product.netto,
+      discount: product.discount,
       merchant_id: product.merchant_id,
       category_id: product.category_id,
       created_at: product.created_at,
@@ -163,45 +183,45 @@ export class MerchantService {
     return this.toMerchantResponse(merchant);
   }
 
-  async update(
-    merchant: Merchant,
-    request: UpdateMerchantRequest,
-  ): Promise<MerchantResponse> {
-    this.logger.debug(
-      `MerchantService.Update(${JSON.stringify(merchant)}, ${JSON.stringify(request)})`,
-    );
+  // async update(
+  //   merchant: Merchant,
+  //   request: UpdateMerchantRequest,
+  // ): Promise<MerchantResponse> {
+  //   this.logger.debug(
+  //     `MerchantService.Update(${JSON.stringify(merchant)}, ${JSON.stringify(request)})`,
+  //   );
 
-    const updateRequest: UpdateMerchantRequest =
-      this.validationService.validate(
-        MerchantValidation.UPDATE_MERCHANT,
-        request,
-      );
+  //   const updateRequest: UpdateMerchantRequest =
+  //     this.validationService.validate(
+  //       MerchantValidation.UPDATE_MERCHANT,
+  //       request,
+  //     );
 
-    if (updateRequest.address) {
-      merchant.address = updateRequest.address;
-    }
+  //   if (updateRequest.address) {
+  //     merchant.address = updateRequest.address;
+  //   }
 
-    if (updateRequest.open_time) {
-      merchant.open_time = updateRequest.open_time;
-    }
+  //   if (updateRequest.open_time) {
+  //     merchant.open_time = updateRequest.open_time;
+  //   }
 
-    if (updateRequest.close_time) {
-      merchant.close_time = updateRequest.close_time;
-    }
+  //   if (updateRequest.close_time) {
+  //     merchant.close_time = updateRequest.close_time;
+  //   }
 
-    if (updateRequest.password) {
-      merchant.password = updateRequest.password;
-    }
+  //   if (updateRequest.password) {
+  //     merchant.password = updateRequest.password;
+  //   }
 
-    const result = await this.prismaService.merchant.update({
-      where: {
-        email: merchant.email,
-      },
-      data: merchant,
-    });
+  //   const result = await this.prismaService.merchant.update({
+  //     where: {
+  //       email: merchant.email,
+  //     },
+  //     data: merchant,
+  //   });
 
-    return this.toMerchantResponse(result);
-  }
+  //   return this.toMerchantResponse(result);
+  // }
 
   async updateStatus(
     merchant: Merchant,

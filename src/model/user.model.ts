@@ -1,13 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class RegisterUserRequest {
-  @ApiProperty({ example: '0812345' })
+  @ApiProperty({ example: '0812345678' })
   phone_number: string;
   @ApiProperty({ example: 'test@example.com' })
   email: string;
   @ApiProperty({ example: 'test123' })
   password: string;
-  @ApiProperty({ example: 'Zen Ganteng' })
+  @ApiProperty({ example: 'John Doe' })
   name: string;
 }
 
@@ -31,7 +31,6 @@ export class UserResponse {
   phone_number: string;
   email: string;
   ratings: number;
-  total_ride: number;
   total_order: number;
   created_at: Date;
   updated_at: Date;

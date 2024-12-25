@@ -74,19 +74,6 @@ export class UserController {
     };
   }
 
-  @Get('/get-rides')
-  @HttpCode(200)
-  @ApiSecurity('Authorization')
-  @ApiOperation({ summary: 'Get all rides history' })
-  async getAllRides(
-    @Auth() driver: any,
-  ): Promise<WebResponse<RidesResponse[]>> {
-    const result = await this.userService.getAllRides(driver);
-    return {
-      data: result,
-    };
-  }
-
   @Delete('/auth/logout')
   @HttpCode(200)
   @ApiSecurity('Authorization')

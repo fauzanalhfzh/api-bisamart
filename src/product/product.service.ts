@@ -28,9 +28,11 @@ export class ProductService {
       id: product.id,
       name: product.name,
       description: product.description,
-      image: product.image,
+      image_url: product.image_url,
       price: product.price,
       stock: product.stock,
+      netto: product.netto,
+      discount: product.discount,
       merchant_id: product.merchant_id,
       category_id: product.category_id,
       created_at: product.created_at,
@@ -74,6 +76,14 @@ export class ProductService {
     this.logger.debug(
       `MartService.create-product(${JSON.stringify(merchant)}, ${JSON.stringify(request)})`,
     );
+    
+    // Pastikan price adalah number
+    if (typeof request.price !== 'number') {
+      request.price = parseFloat(request.price as unknown as string);
+      if (isNaN(request.price)) {
+        throw new Error('Price harus berupa angka.');
+      }
+    }
 
     // Pastikan stock adalah number
     if (typeof request.stock !== 'number') {
@@ -83,11 +93,19 @@ export class ProductService {
       }
     }
 
-    // Pastikan price adalah number
-    if (typeof request.price !== 'number') {
-      request.price = parseFloat(request.price as unknown as string);
-      if (isNaN(request.price)) {
-        throw new Error('Price harus berupa angka.');
+    // Pastikan netto adalah number
+    if (typeof request.netto !== 'number') {
+      request.netto = parseFloat(request.netto as unknown as string);
+      if (isNaN(request.netto)) {
+        throw new Error('Netto harus berupa angka.');
+      }
+    }
+
+    // Pastikan discount adalah number
+    if (typeof request.discount !== 'number') {
+      request.discount = parseFloat(request.discount as unknown as string);
+      if (isNaN(request.discount)) {
+        throw new Error('Discount harus berupa angka.');
       }
     }
 
@@ -102,9 +120,11 @@ export class ProductService {
       data: {
         name: createRequest.name,
         description: createRequest.description,
-        image: imageUrl,
+        image_url: imageUrl,
         price: createRequest.price,
         stock: createRequest.stock,
+        netto: createRequest.netto,
+        discount: createRequest.discount,
         merchant_id: createRequest.merchant_id,
         category_id: createRequest.category_id,
       },
