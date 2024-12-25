@@ -13,7 +13,6 @@ import {
   LoginMerchantRequest,
   MerchantResponse,
   RegisterMerchantRequest,
-  UpdateMerchantRequest,
   UpdateStatusRequest,
 } from 'src/model/merchant.model';
 import { WebResponse } from 'src/model/web.model';
@@ -66,19 +65,19 @@ export class MerchantController {
     };
   }
 
-  @Patch('/current')
-  @HttpCode(200)
-  @ApiSecurity('Authorization')
-  @ApiOperation({ summary: 'Update data merchant' })
-  async update(
-    @Auth() merchant: Merchant,
-    @Body() request: UpdateMerchantRequest,
-  ): Promise<WebResponse<MerchantResponse>> {
-    const result = await this.merchantService.update(merchant, request);
-    return {
-      data: result,
-    };
-  }
+  // @Patch('/current')
+  // @HttpCode(200)
+  // @ApiSecurity('Authorization')
+  // @ApiOperation({ summary: 'Update data merchant' })
+  // async update(
+  //   @Auth() merchant: Merchant,
+  //   @Body() request: UpdateMerchantRequest,
+  // ): Promise<WebResponse<MerchantResponse>> {
+  //   const result = await this.merchantService.update(merchant, request);
+  //   return {
+  //     data: result,
+  //   };
+  // }
 
   @Patch('/current/update-status')
   @HttpCode(200)
