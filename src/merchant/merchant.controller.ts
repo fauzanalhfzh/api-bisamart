@@ -18,10 +18,6 @@ import {
 import { WebResponse } from 'src/model/web.model';
 import { Merchant } from '@prisma/client';
 import { Auth } from 'src/common/auth.decorator';
-import { CreateProductRequest, ProductResponse } from 'src/model/product.model';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
 
 @ApiTags('Merchant')
 @Controller('api/v1/merchant')

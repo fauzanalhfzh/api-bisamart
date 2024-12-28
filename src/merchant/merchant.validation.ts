@@ -16,15 +16,19 @@ export class MerchantValidation {
     owner_name: z.string().min(1).max(50),
     merchant_name: z.string().min(1).max(50),
     category_merchant: z.string().min(1).max(50),
-    status: z.enum([MerchantStatus.BUKA, MerchantStatus.TAHAN, MerchantStatus.TUTUP]),
+    status: z.enum([
+      MerchantStatus.BUKA,
+      MerchantStatus.TAHAN,
+      MerchantStatus.TUTUP,
+    ]),
     address_line: z.string().min(1).max(50),
     city: z.string().min(1).max(50),
     state: z.string().min(1).max(50),
     postal_code: z.string().min(1).max(50),
     latitude: z.number().min(1).optional(),
-    longitude: z.number().min(1).optional()
+    longitude: z.number().min(1).optional(),
   });
-  
+
   static readonly LOGIN: ZodType = z.object({
     email: z.string().min(1).max(50),
     password: z.string().min(1).max(100),
@@ -37,6 +41,10 @@ export class MerchantValidation {
     password: z.string().min(1).max(100).optional(),
   });
   static readonly UPDATESTATUS: ZodType = z.object({
-    status: z.enum([MerchantStatus.BUKA, MerchantStatus.TAHAN, MerchantStatus.TUTUP]),
+    status: z.enum([
+      MerchantStatus.BUKA,
+      MerchantStatus.TAHAN,
+      MerchantStatus.TUTUP,
+    ]),
   });
 }

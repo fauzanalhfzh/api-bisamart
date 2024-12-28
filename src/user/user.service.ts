@@ -13,8 +13,6 @@ import { UserValidation } from './user.validation';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuid } from 'uuid';
 import { User } from '@prisma/client';
-import { RidesResponse } from '../model/rides.model';
-import { promise } from 'zod';
 
 @Injectable()
 export class UserService {

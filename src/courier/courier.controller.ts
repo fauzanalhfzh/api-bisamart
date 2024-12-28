@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   Param,
-  ParseIntPipe,
   Patch,
   Post,
   UploadedFiles,
@@ -31,7 +30,6 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { Auth } from '../common/auth.decorator';
 import { Courier } from '@prisma/client';
-import { RidesResponse } from '../model/rides.model';
 
 @ApiTags('Courier')
 @Controller('/api/v1/courier')
@@ -61,14 +59,14 @@ export class CourierController {
             } else if (file.fieldname === 'license_url') {
               cb(null, './public/courier/license');
             }
-            },
-            filename: (req, file, cb) => {
-              const timestamp = Date.now();
-              let prefix = '';
+          },
+          filename: (req, file, cb) => {
+            const timestamp = Date.now();
+            let prefix = '';
 
-              switch (file.fieldname) {
-                case 'ktp_url':
-                  prefix = 'KTP';
+            switch (file.fieldname) {
+              case 'ktp_url':
+                prefix = 'KTP';
                 break;
               case 'selfie_with_sim_url':
                 prefix = 'SIM';

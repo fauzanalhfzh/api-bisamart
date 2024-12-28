@@ -76,7 +76,7 @@ export class ProductService {
     this.logger.debug(
       `MartService.create-product(${JSON.stringify(merchant)}, ${JSON.stringify(request)})`,
     );
-    
+
     // Pastikan price adalah number
     if (typeof request.price !== 'number') {
       request.price = parseFloat(request.price as unknown as string);

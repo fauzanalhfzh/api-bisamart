@@ -18,7 +18,6 @@ import {
 } from '../model/user.model';
 import { Auth } from '../common/auth.decorator';
 import { User } from '@prisma/client';
-import { RidesResponse } from '../model/rides.model';
 
 @ApiTags('Users')
 @Controller('/api/v1/users')
