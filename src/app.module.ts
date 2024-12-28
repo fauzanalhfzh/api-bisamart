@@ -5,6 +5,7 @@ import { SimpleModule } from './simple/simple.module';
 import { DriverModule } from './courier/courier.module';
 import { MerchantModule } from './merchant/merchant.module';
 import { ProductModule } from './product/product.module';
+import { AddressModule } from './address/address.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ProductModule } from './product/product.module';
     DriverModule,
     MerchantModule,
     ProductModule,
+    AddressModule,
   ],
   controllers: [],
   providers: [],
