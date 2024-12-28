@@ -31,6 +31,11 @@ enum StatusPayment {
   FAILED
 }
 
+enum AddressTag {
+  RUMAH
+  KANTOR
+}
+
 model User {
   id           String @id @default(uuid())
   name         String
@@ -139,7 +144,7 @@ model Courier {
 }
 
 model Address {
-  id           String   @id @default(uuid())
+  id           String     @id @default(uuid())
   user_id      String
   address_line String
   city         String
@@ -148,8 +153,9 @@ model Address {
   latitude     Float?
   longitude    Float?
   is_primary   Boolean
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+  tag          AddressTag @default(RUMAH)
+  created_at   DateTime   @default(now())
+  updated_at   DateTime   @updatedAt
 
   user User @relation("user_address", fields: [user_id], references: [id])
 
