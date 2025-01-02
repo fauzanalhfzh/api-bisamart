@@ -5,6 +5,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as express from 'express';
 import { join } from 'path';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -25,8 +26,11 @@ async function bootstrap() {
   const logger = app.get(WINSTON_MODULE_NEST_PROVIDER);
   app.useLogger(logger);
 
+  const configService = app.get(ConfigService);
+  const port = configService.get('APP_PORT', 3001);
+
   app.use('/public', express.static(join(process.cwd(), 'public')));
 
-  await app.listen(3000);
+  await app.listen(port);
 }
 bootstrap();
