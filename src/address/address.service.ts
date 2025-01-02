@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Address } from '@prisma/client';
+import { Address, User } from '@prisma/client';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from 'src/common/prisma.service';
 import { ValidationService } from 'src/common/validation.service';
@@ -32,7 +32,10 @@ export class AddressService {
     };
   }
 
-  async create(request: CreateAddressRequest): Promise<AddressResponse> {
+  async create(
+    user: User,
+    request: CreateAddressRequest,
+  ): Promise<AddressResponse> {
     this.logger.debug(`AddressService.create(${JSON.stringify(request)})`);
 
     const createRequest: CreateAddressRequest = this.validationService.validate(
@@ -41,7 +44,17 @@ export class AddressService {
     );
 
     const address = await this.prismaService.address.create({
-      data: createRequest,
+      data: {
+        user_id: user.id,
+        address_line: createRequest.address_line,
+        city: createRequest.city,
+        state: createRequest.state,
+        postal_code: createRequest.postal_code,
+        latitude: createRequest.latitude,
+        longitude: createRequest.longitude,
+        is_primary: createRequest.is_primary,
+        tag: createRequest.tag,
+      },
     });
 
     return this.toAddressResponse(address);

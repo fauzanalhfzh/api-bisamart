@@ -1,8 +1,10 @@
 import { Body, Controller, HttpCode, Post } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { AddressService } from './address.service';
 import { AddressResponse, CreateAddressRequest } from 'src/model/address.model';
 import { WebResponse } from 'src/model/web.model';
+import { Auth } from 'src/common/auth.decorator';
+import { User } from '@prisma/client';
 
 @ApiTags('Address User')
 @Controller('/api/v1/users/addresses')
@@ -11,11 +13,13 @@ export class AddressController {
 
   @Post('/create')
   @HttpCode(200)
+  @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'Create address for users' })
   async create(
+    @Auth() user: User,
     @Body() request: CreateAddressRequest,
   ): Promise<WebResponse<AddressResponse>> {
-    const result = await this.addressService.create(request);
+    const result = await this.addressService.create(user, request);
     return {
       data: result,
     };
