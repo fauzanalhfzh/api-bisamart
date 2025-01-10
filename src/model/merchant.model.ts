@@ -18,7 +18,7 @@ export class RegisterMerchantRequest {
   place_of_birth: string;
   @ApiProperty({ example: '2024-12-25' })
   date_of_birth: Date;
-  @ApiProperty({ example: '15:00' })
+  @ApiProperty({ example: 'Warnasari, lorem ipsum' })
   address_ktp: string;
   @ApiProperty({ example: '' })
   self_photo_url: string;
@@ -32,11 +32,11 @@ export class RegisterMerchantRequest {
   category_merchant: string;
   @ApiProperty({ example: 'public/' })
   saving_book_url?: string;
+  @ApiProperty({ example: 'Rumah Makan Abang Ipan' })
+  merchant_name: string;
   @ApiProperty({
     example: [MerchantStatus.BUKA, MerchantStatus.TAHAN, MerchantStatus.TUTUP],
   })
-  @ApiProperty({ example: 'Rumah Makan Abang Ipan' })
-  merchant_name: string;
   status: MerchantStatus;
   @ApiProperty({ example: 'Jalan Jenderal Sudirman No. 10' })
   address_line: string;
