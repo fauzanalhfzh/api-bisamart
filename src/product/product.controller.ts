@@ -76,7 +76,7 @@ export class ProductController {
     };
   }
 
-  @Get('/:id/product')
+  @Get('merchant/:id/product')
   @HttpCode(200)
   @ApiOperation({ summary: 'Get all product by merchant ID' })
   async getProductByMerchantId(
@@ -86,6 +86,18 @@ export class ProductController {
     return {
       data: result,
     };
+  }
+
+  @Get('categories/:id/products')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Get al product by category' })
+  async getProductByCategory(
+    @Param('id') id: string,
+  ): Promise<WebResponse<ProductResponse[]>> {
+    const result = await this.productService.getProductByCategory(id);
+    return {
+      data: result,
+    }
   }
 
   @Delete('/product/:id')

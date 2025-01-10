@@ -170,7 +170,33 @@ export class ProductService {
     return this.toProductResponse(result);
   }
 
-  async getProductByCategory() {}
+  async getProductByCategory(id: string): Promise<ProductResponse[]> {
+    this.logger.debug(`MartService.getProductsByCategory(${JSON.stringify(id)})`);
+
+    const products = await this.prismaService.product.findMany({
+      where: {
+        category_id: id
+      },
+      include: {
+        category: true
+      }
+    })
+
+    return products.map(product => ({
+      id: product.id,
+      image_url: product.image_url,
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      stock: product.stock,
+      netto: product.netto,
+      discount: product.discount,
+      merchant_id: product.merchant_id,
+      category_id: product.category_id,
+      created_at: product.created_at,
+      updated_at: product.updated_at,
+    }))
+  }
 
   async editProduct(
     product: Product,
