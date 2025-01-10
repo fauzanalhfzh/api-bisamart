@@ -69,7 +69,7 @@ model Merchant {
   ktp            String
   ktp_url        String
   place_of_birth String
-  date_of_birth  DateTime
+  date_of_birth  String
   address_ktp    String
   self_photo_url String
 
