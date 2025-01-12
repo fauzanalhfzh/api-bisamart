@@ -17,7 +17,7 @@ export class RegisterMerchantRequest {
   @ApiProperty({ example: 'Cilegon' })
   place_of_birth: string;
   @ApiProperty({ example: '2024-12-25' })
-  date_of_birth: Date;
+  date_of_birth: string;
   @ApiProperty({ example: 'Warnasari, lorem ipsum' })
   address_ktp: string;
   @ApiProperty({ example: '' })
@@ -34,10 +34,6 @@ export class RegisterMerchantRequest {
   saving_book_url?: string;
   @ApiProperty({ example: 'Rumah Makan Abang Ipan' })
   merchant_name: string;
-  @ApiProperty({
-    example: [MerchantStatus.BUKA, MerchantStatus.TAHAN, MerchantStatus.TUTUP],
-  })
-  status: MerchantStatus;
   @ApiProperty({ example: 'Jalan Jenderal Sudirman No. 10' })
   address_line: string;
   @ApiProperty({ example: 'Cilegon' })
@@ -75,7 +71,7 @@ export class MerchantResponse {
   ktp: string;
   ktp_url: string;
   place_of_birth: string;
-  date_of_birth: Date;
+  date_of_birth: string;
   address_ktp: string;
   self_photo_url: string;
 

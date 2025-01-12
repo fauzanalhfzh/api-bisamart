@@ -113,24 +113,57 @@ export class MerchantService {
     return product;
   }
 
-  async register(request: RegisterMerchantRequest): Promise<MerchantResponse> {
+  async register(
+    request: RegisterMerchantRequest,
+    files: {
+      ktp_url?: Express.Multer.File[];
+      self_photo_url?: Express.Multer.File[];
+      saving_book_url?: Express.Multer.File[];
+    },
+  ): Promise<MerchantResponse> {
     this.logger.debug(`MartService.register(${JSON.stringify(request)})`);
 
+    if (typeof request.latitude !== 'number') {
+      request.latitude = parseFloat(request.latitude as unknown as string);
+      if (isNaN(request.latitude)) {
+        throw new Error('Latitude harus berupa number.');
+      }
+    }
+
+    if (typeof request.longitude !== 'number') {
+      request.longitude = parseFloat(request.longitude as unknown as string);
+      if (isNaN(request.longitude)) {
+        throw new Error('Latitude harus berupa number.');
+      }
+    }
+    
     const registerRequest: RegisterMerchantRequest =
       this.validationService.validate(MerchantValidation.REGISTER, request);
 
-    const totalMartWithSamePhoneNumber =
+    const totalMartWithSameKTP =
       await this.prismaService.merchant.count({
         where: {
-          phone_number: registerRequest.phone_number,
+          ktp: registerRequest.ktp,
         },
       });
 
-    if (totalMartWithSamePhoneNumber != 0) {
-      throw new HttpException('Phone number already exist', 400);
+    if (totalMartWithSameKTP != 0) {
+      throw new HttpException('KTP already exist', 400);
     }
 
     registerRequest.password = await bcrypt.hash(registerRequest.password, 10);
+
+    if(files.ktp_url?.[0]) {
+      registerRequest.ktp_url = `/public/merchant/ktp/${files.ktp_url[0].filename}`
+    }
+
+    if(files.saving_book_url?.[0]) {
+      registerRequest.saving_book_url = `/public/merchant/book/${files.saving_book_url[0].filename}`
+    }
+
+    if(files.self_photo_url?.[0]) {
+      registerRequest.self_photo_url = `/public/merchant/selfie/${files.self_photo_url[0].filename}`
+    }
 
     const merchant = await this.prismaService.merchant.create({
       data: registerRequest,
@@ -240,7 +273,7 @@ export class MerchantService {
 
     const result = await this.prismaService.merchant.update({
       where: {
-        email: merchant.email,
+        ktp: merchant.ktp,
       },
       data: merchant,
     });

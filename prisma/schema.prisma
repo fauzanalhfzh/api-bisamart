@@ -66,7 +66,7 @@ model Merchant {
   phone_number String @unique
   password     String
 
-  ktp            String
+  ktp            String @unique
   ktp_url        String
   place_of_birth String
   date_of_birth  String
