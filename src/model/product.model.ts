@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateProductRequest {
-  @ApiProperty({ example: '/public/products/' })
+  @ApiProperty({ example: '' })
   image_url: string;
   @ApiProperty({ example: 'Paku 7cm' })
   name: string;
@@ -22,6 +22,8 @@ export class CreateProductRequest {
 }
 
 export class UpdateProductRequest {
+  @ApiProperty({ example: '' })
+  image_url?: string;
   @ApiProperty({ example: 'Paku 9cm' })
   name?: string;
   @ApiProperty({ example: '2 kg khusus kayu' })
@@ -34,6 +36,8 @@ export class UpdateProductRequest {
   netto?: number;
   @ApiProperty({ example: 10 })
   discount?: number;
+  @ApiProperty({ example: 10 })
+  category_id?: number;
 }
 
 export class ProductResponse {
