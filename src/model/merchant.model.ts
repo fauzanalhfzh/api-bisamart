@@ -62,6 +62,16 @@ export class UpdateStatusRequest {
   status: MerchantStatus;
 }
 
+export class UpdateMerchantRequest {}
+
+export class OperatingHoursRequest {
+  merchant_id: string;
+  day_of_week: string;
+  is_24_hours: boolean;
+  open_time: string;
+  close_time: string;
+}
+
 export class MerchantResponse {
   id: string;
   name: string;
