@@ -10,6 +10,8 @@ import {
 } from '../model/product.model';
 import { Logger } from 'winston';
 import { ProductValidation } from '../product/product.validation';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class ProductService {
@@ -71,7 +73,9 @@ export class ProductService {
   async createProduct(
     merchant: Merchant,
     request: CreateProductRequest,
-    file?: Express.Multer.File,
+    files: {
+      image_url?: Express.Multer.File[];
+    },
   ): Promise<ProductResponse> {
     this.logger.debug(
       `MartService.create-product(${JSON.stringify(merchant)}, ${JSON.stringify(request)})`,
@@ -114,20 +118,15 @@ export class ProductService {
       request,
     );
 
-    const imageUrl = `/public/products/${file.filename}`;
+    if (files.image_url?.[0]) {
+      createRequest.image_url = `/public/products/${files.image_url[0].filename}`;
+    } else {
+      this.logger.warn('File image_url tidak ditemukan atau kosong.');
+      throw new Error('Image file is required.');
+    }
 
     const product = await this.prismaService.product.create({
-      data: {
-        name: createRequest.name,
-        description: createRequest.description,
-        image_url: imageUrl,
-        price: createRequest.price,
-        stock: createRequest.stock,
-        netto: createRequest.netto,
-        discount: createRequest.discount,
-        merchant_id: createRequest.merchant_id,
-        category_id: createRequest.category_id,
-      },
+      data: createRequest,
     });
 
     return this.toProductResponse(product);
@@ -171,18 +170,20 @@ export class ProductService {
   }
 
   async getProductByCategory(id: string): Promise<ProductResponse[]> {
-    this.logger.debug(`MartService.getProductsByCategory(${JSON.stringify(id)})`);
+    this.logger.debug(
+      `MartService.getProductsByCategory(${JSON.stringify(id)})`,
+    );
 
     const products = await this.prismaService.product.findMany({
       where: {
-        category_id: id
+        category_id: id,
       },
       include: {
-        category: true
-      }
-    })
+        category: true,
+      },
+    });
 
-    return products.map(product => ({
+    return products.map((product) => ({
       id: product.id,
       image_url: product.image_url,
       name: product.name,
@@ -195,24 +196,23 @@ export class ProductService {
       category_id: product.category_id,
       created_at: product.created_at,
       updated_at: product.updated_at,
-    }))
+    }));
   }
 
   async editProduct(
+    merchant: Merchant,
     product: Product,
     request: UpdateProductRequest,
+    id: string,
+    files: {
+      image_url?: Express.Multer.File[];
+    },
   ): Promise<ProductResponse> {
-    this.logger.debug(
-      `UserService.Update(${JSON.stringify(product)}, ${JSON.stringify(request)})`,
-    );
+    this.logger.debug(`UserService.Update(${JSON.stringify(request)})`);
+    this.logger.debug(`UserService.Update(${JSON.stringify(product)})`);
+    this.logger.debug(`UserService.Update(${JSON.stringify(merchant)})`);
 
-    // Pastikan stock adalah number
-    if (typeof request.stock !== 'number') {
-      request.stock = parseInt(request.stock as unknown as string, 10);
-      if (isNaN(request.stock)) {
-        throw new Error('Stock harus berupa angka.');
-      }
-    }
+    await this.checkProductMustExists(id);
 
     // Pastikan price adalah number
     if (typeof request.price !== 'number') {
@@ -222,10 +222,47 @@ export class ProductService {
       }
     }
 
+    // Pastikan stock adalah number
+    if (typeof request.stock !== 'number') {
+      request.stock = parseInt(request.stock as unknown as string, 10);
+      if (isNaN(request.stock)) {
+        throw new Error('Stock harus berupa angka.');
+      }
+    }
+
+    // Pastikan netto adalah number
+    if (typeof request.netto !== 'number') {
+      request.netto = parseFloat(request.netto as unknown as string);
+      if (isNaN(request.netto)) {
+        throw new Error('Netto harus berupa angka.');
+      }
+    }
+
+    // Pastikan discount adalah number
+    if (typeof request.discount !== 'number') {
+      request.discount = parseFloat(request.discount as unknown as string);
+      if (isNaN(request.discount)) {
+        throw new Error('Discount harus berupa angka.');
+      }
+    }
+
     const updateRequest: UpdateProductRequest = this.validationService.validate(
       ProductValidation.UDPATE_PRODUCT,
       request,
     );
+
+    if (files.image_url?.[0]) {
+      // Hapus gambar sebelumnya
+      const oldImagePath = path.join(process.cwd(), product.image_url);
+      if (fs.existsSync(oldImagePath)) {
+        fs.unlinkSync(oldImagePath);
+      }
+
+      updateRequest.image_url = `/public/products/${files.image_url[0].filename}`;
+    } else {
+      this.logger.warn('File image_url tidak ditemukan atau kosong.');
+      throw new Error('Image file is required.');
+    }
 
     if (updateRequest.name) {
       product.name = updateRequest.name;
