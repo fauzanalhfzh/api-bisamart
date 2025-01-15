@@ -67,6 +67,13 @@ export class CourierService {
   ): Promise<CourierResponse> {
     this.logger.debug(`DriverService.register(${JSON.stringify(request)})`);
 
+    if (typeof request.vehicle_speed !== 'number') {
+      request.vehicle_speed = parseFloat(request.vehicle_speed as unknown as string);
+      if (isNaN(request.vehicle_speed)) {
+        throw new Error('Speed harus berupa number.');
+      }
+    }
+
     const registerRequest: RegisterCourierRequest =
       this.validationService.validate(CourierValidation.REGISTER, request);
 
