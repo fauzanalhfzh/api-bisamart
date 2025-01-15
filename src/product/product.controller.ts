@@ -5,18 +5,28 @@ import {
   Get,
   HttpCode,
   Param,
+  Patch,
   Post,
-  UploadedFile,
+  UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import {
+  ApiConsumes,
+  ApiOperation,
+  ApiSecurity,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ProductService } from './product.service';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname, join } from 'path';
+import { extname } from 'path';
 import { Auth } from '../common/auth.decorator';
 import { Merchant } from '@prisma/client';
-import { CreateProductRequest, ProductResponse } from '../model/product.model';
+import {
+  CreateProductRequest,
+  ProductResponse,
+  UpdateProductRequest,
+} from '../model/product.model';
 import { WebResponse } from '../model/web.model';
 
 @ApiTags('Product')
@@ -28,26 +38,90 @@ export class ProductController {
   @HttpCode(200)
   @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'Create new product' })
+  @ApiConsumes('multipart/form-data')
   @UseInterceptors(
-    FileInterceptor('image', {
-      storage: diskStorage({
-        destination: join(process.cwd(), 'public/products'),
-        filename: (req, file, cb) => {
-          const filename = `PR${Date.now()}` + extname(file.originalname);
-          cb(null, filename);
+    FileFieldsInterceptor(
+      [
+        {
+          name: 'image_url',
+          maxCount: 1,
         },
-      }),
-    }),
+      ],
+      {
+        storage: diskStorage({
+          destination: (req, file, cb) => {
+            if (file.fieldname === 'image_url') {
+              cb(null, './public/products');
+            }
+          },
+          filename(req, file, cb) {
+            const timestamp = Date.now();
+            let prefix = 'PR';
+            const filename = `${prefix}-${timestamp}${extname(file.originalname)}`;
+            cb(null, filename);
+          },
+        }),
+      },
+    ),
   )
   async createProduct(
     @Auth() merchant: Merchant,
     @Body() request: CreateProductRequest,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFiles() file: { image_url: Express.Multer.File[] },
   ): Promise<WebResponse<ProductResponse>> {
     const result = await this.productService.createProduct(
       merchant,
       request,
       file,
+    );
+    return {
+      data: result,
+    };
+  }
+
+  @Patch('/product/:id')
+  @HttpCode(200)
+  @ApiSecurity('Authorization')
+  @ApiOperation({ summary: 'Update product' })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        {
+          name: 'image_url',
+          maxCount: 1,
+        },
+      ],
+      {
+        storage: diskStorage({
+          destination: (req, file, cb) => {
+            if (file.fieldname === 'image_url') {
+              cb(null, './public/products');
+            }
+          },
+          filename(req, file, cb) {
+            const timestamp = Date.now();
+            let prefix = 'PR';
+            const filename = `${prefix}-${timestamp}${extname(file.originalname)}`;
+            cb(null, filename);
+          },
+        }),
+      },
+    ),
+  )
+  async updateProduct(
+    @Auth() merchant: Merchant,
+    @Body() request: UpdateProductRequest,
+    @Param('id') id: string,
+    @UploadedFiles() files: { image_url: Express.Multer.File[] },
+  ): Promise<WebResponse<ProductResponse>> {
+    const product = await this.productService.checkProductMustExists(id);
+    const result = await this.productService.editProduct(
+      merchant,
+      product,
+      request,
+      id,
+      files,
     );
     return {
       data: result,
@@ -97,7 +171,7 @@ export class ProductController {
     const result = await this.productService.getProductByCategory(id);
     return {
       data: result,
-    }
+    };
   }
 
   @Delete('/product/:id')
