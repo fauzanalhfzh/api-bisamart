@@ -147,8 +147,30 @@ export class MerchantService {
         },
       });
 
+      const totalMartWithSamePhoneNumber =
+      await this.prismaService.merchant.count({
+        where: {
+          phone_number: registerRequest.phone_number,
+        },
+      });
+
+      const totalMartWithSameEmail =
+      await this.prismaService.merchant.count({
+        where: {
+          email: registerRequest.email,
+        },
+      });
+
     if (totalMartWithSameKTP != 0) {
       throw new HttpException('KTP already exist', 400);
+    }
+
+    if (totalMartWithSamePhoneNumber != 0) {
+      throw new HttpException('Phone Number already exist', 400);
+    }
+
+    if (totalMartWithSameEmail != 0) {
+      throw new HttpException('Email already exist', 400);
     }
 
     registerRequest.password = await bcrypt.hash(registerRequest.password, 10);
