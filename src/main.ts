@@ -10,6 +10,12 @@ import { ConfigService } from '@nestjs/config';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  app.enableCors({
+    origin: '*', // Izinkan semua domain (bisa diganti dengan domain tertentu)
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type, Authorization',
+  });
+
   const config = new DocumentBuilder()
     .setTitle('BISADRIVE API DOCUMENTATION')
     .setDescription('API documentation for Bisa Service apps')
