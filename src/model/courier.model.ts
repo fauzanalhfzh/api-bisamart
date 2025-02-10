@@ -13,6 +13,10 @@ export class RegisterCourierRequest {
   @ApiProperty({
     example: 'Jl Brigjen Slamet Riyadi 40 RT 001/04, Jawa Tengah',
   })
+  date_of_birth: Date;
+  @ApiProperty({
+    example: 'Jl Brigjen Slamet Riyadi 40 RT 001/04, Jawa Tengah',
+  })
   address_ktp: string;
   @ApiProperty({ example: '3606762101234' })
   ktp: string;
@@ -54,6 +58,7 @@ export class CourierResponse {
   email: string;
   phone_number: string;
 
+  date_of_birth: Date;
   address_ktp: string;
   ktp: string;
   ktp_url: string;

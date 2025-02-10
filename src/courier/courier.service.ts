@@ -28,6 +28,7 @@ export class CourierService {
       name: courier.name,
       email: courier.email,
       phone_number: courier.phone_number,
+      date_of_birth: courier.date_of_birth,
       address_ktp: courier.address_ktp,
       ktp: courier.ktp,
       ktp_url: courier.ktp_url,
@@ -71,6 +72,13 @@ export class CourierService {
       request.vehicle_speed = parseFloat(request.vehicle_speed as unknown as string);
       if (isNaN(request.vehicle_speed)) {
         throw new Error('Speed harus berupa number.');
+      }
+    }
+
+    if (typeof request.date_of_birth === 'string') {
+      request.date_of_birth = new Date(request.date_of_birth);
+      if (isNaN(request.date_of_birth.getTime())) {
+        throw new Error('Tanggal lahir tidak valid.');
       }
     }
 

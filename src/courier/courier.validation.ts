@@ -7,6 +7,7 @@ export class CourierValidation {
     email: z.string().min(1).max(50).email(),
     phone_number: z.string().min(1).max(50),
     password: z.string().min(1).max(100),
+    date_of_birth: z.date(),
     address_ktp: z.string().min(1).max(150),
     ktp: z.string().min(1).max(30),
     vehicle_brand: z.string().min(1).max(50),

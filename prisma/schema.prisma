@@ -114,6 +114,7 @@ model Courier {
   phone_number String @unique
   password     String
 
+  date_of_birth       DateTime
   address_ktp         String
   ktp                 String
   ktp_url             String
