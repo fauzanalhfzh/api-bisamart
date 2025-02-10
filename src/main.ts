@@ -35,6 +35,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get('APP_PORT', 3001);
 
+  // TODO Pindahkan ke folder storage karna image tidak bisa di akses public selain product
   app.use('/public', express.static(join(process.cwd(), 'public')));
 
   await app.listen(port);
