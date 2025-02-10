@@ -53,8 +53,18 @@ export class UserService {
       },
     });
 
+    const totalUserWithSamePhoneEmail = await this.prismaService.user.count({
+      where: {
+        email: registerRequest.email
+      }
+    })
+
     if (totalUserWithSamePhoneNumber != 0) {
       throw new HttpException('Phone number already exist', 400);
+    }
+
+    if (totalUserWithSamePhoneEmail != 0) {
+      throw new HttpException('Email already exist', 400);
     }
 
     registerRequest.password = await bcrypt.hash(registerRequest.password, 10);
