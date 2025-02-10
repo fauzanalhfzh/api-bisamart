@@ -142,7 +142,7 @@ export class CourierService {
 
     let courier = await this.prismaService.courier.findUnique({
       where: {
-        email: loginRequest.email,
+        phone_number: loginRequest.phone_number,
       },
     });
 
@@ -161,7 +161,7 @@ export class CourierService {
 
     courier = await this.prismaService.courier.update({
       where: {
-        email: loginRequest.email,
+        phone_number: loginRequest.phone_number,
       },
       data: {
         token: uuid(),

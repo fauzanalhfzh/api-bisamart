@@ -21,7 +21,7 @@ export class CourierValidation {
   });
 
   static readonly LOGIN: ZodType = z.object({
-    email: z.string().min(1).max(50),
+    phone_number: z.string().min(1).max(50),
     password: z.string().min(1).max(100),
   });
 }

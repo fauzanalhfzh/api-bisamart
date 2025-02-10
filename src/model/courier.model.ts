@@ -37,8 +37,8 @@ export class RegisterCourierRequest {
 }
 
 export class LoginCourierRequest {
-  @ApiProperty({ example: 'test@example.com' })
-  email: string;
+  @ApiProperty({ example: '0812345678' })
+  phone_number: string;
   @ApiProperty({ example: 'test123' })
   password: string;
 }
