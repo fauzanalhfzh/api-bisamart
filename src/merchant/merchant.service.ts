@@ -176,15 +176,15 @@ export class MerchantService {
     registerRequest.password = await bcrypt.hash(registerRequest.password, 10);
 
     if(files.ktp_url?.[0]) {
-      registerRequest.ktp_url = `/public/merchant/ktp/${files.ktp_url[0].filename}`
+      registerRequest.ktp_url = `/storage/merchant/ktp/${files.ktp_url[0].filename}`
     }
 
     if(files.saving_book_url?.[0]) {
-      registerRequest.saving_book_url = `/public/merchant/book/${files.saving_book_url[0].filename}`
+      registerRequest.saving_book_url = `/storage/merchant/book/${files.saving_book_url[0].filename}`
     }
 
     if(files.self_photo_url?.[0]) {
-      registerRequest.self_photo_url = `/public/merchant/selfie/${files.self_photo_url[0].filename}`
+      registerRequest.self_photo_url = `/storage/merchant/selfie/${files.self_photo_url[0].filename}`
     }
 
     const merchant = await this.prismaService.merchant.create({

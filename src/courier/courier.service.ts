@@ -120,17 +120,17 @@ export class CourierService {
     registerRequest.password = await bcrypt.hash(registerRequest.password, 10);
 
     if (files.ktp_url?.[0]) {
-      registerRequest.ktp_url = `/public/courier/ktp/${files.ktp_url[0].filename}`;
+      registerRequest.ktp_url = `/storage/courier/ktp/${files.ktp_url[0].filename}`;
     }
     if (files.selfie_with_sim_url?.[0]) {
-      registerRequest.selfie_with_sim_url = `/public/courier/selfie/${files.selfie_with_sim_url[0].filename}`;
+      registerRequest.selfie_with_sim_url = `/storage/courier/selfie/${files.selfie_with_sim_url[0].filename}`;
     }
     if (files.profile_url?.[0]) {
-      registerRequest.profile_url = `/public/courier/profile/${files.profile_url[0].filename}`;
+      registerRequest.profile_url = `/storage/courier/profile/${files.profile_url[0].filename}`;
     }
 
     if (files.license_url?.[0]) {
-      registerRequest.license_url = `/public/courier/license/${files.license_url[0].filename}`;
+      registerRequest.license_url = `/storage/courier/license/${files.license_url[0].filename}`;
     }
 
     const courier = await this.prismaService.courier.create({

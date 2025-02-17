@@ -51,13 +51,13 @@ export class CourierController {
         storage: diskStorage({
           destination: (req, file, cb) => {
             if (file.fieldname === 'ktp_url') {
-              cb(null, './public/courier/ktp');
+              cb(null, './storage/courier/ktp');
             } else if (file.fieldname === 'selfie_with_sim_url') {
-              cb(null, './public/courier/sim');
+              cb(null, './storage/courier/sim');
             } else if (file.fieldname === 'profile_url') {
-              cb(null, './public/courier/profile');
+              cb(null, './storage/courier/profile');
             } else if (file.fieldname === 'license_url') {
-              cb(null, './public/courier/license');
+              cb(null, './storage/courier/license');
             }
           },
           filename: (req, file, cb) => {

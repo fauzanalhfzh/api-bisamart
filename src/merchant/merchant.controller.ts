@@ -49,11 +49,11 @@ export class MerchantController {
         storage: diskStorage({
           destination: (req, file, cb) => {
             if (file.fieldname === 'ktp_url') {
-              cb(null, './public/merchant/ktp');
+              cb(null, './storage/merchant/ktp');
             } else if (file.fieldname === 'self_photo_url') {
-              cb(null, './public/merchant/selfie');
+              cb(null, './storage/merchant/selfie');
             } else if (file.fieldname === 'saving_book_url') {
-              cb(null, './public/merchant/book');
+              cb(null, './storage/merchant/book');
             }
           },
           filename: (req, file, cb) => {
