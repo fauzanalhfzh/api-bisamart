@@ -6,4 +6,4 @@ import { CourierController } from './courier.controller';
   providers: [CourierService],
   controllers: [CourierController],
 })
-export class DriverModule {}
+export class CourierModule {}
