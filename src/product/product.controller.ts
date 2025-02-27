@@ -82,7 +82,7 @@ export class ProductController {
   @Patch('/product/:id')
   @HttpCode(200)
   @ApiSecurity('Authorization')
-  @ApiOperation({ summary: 'Update product' })
+  @ApiOperation({ summary: 'Update product by ID' })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileFieldsInterceptor(
@@ -164,7 +164,7 @@ export class ProductController {
 
   @Get('categories/:id/products')
   @HttpCode(200)
-  @ApiOperation({ summary: 'Get al product by category' })
+  @ApiOperation({ summary: 'Get all product by category' })
   async getProductByCategory(
     @Param('id') id: string,
   ): Promise<WebResponse<ProductResponse[]>> {

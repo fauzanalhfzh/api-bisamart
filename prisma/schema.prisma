@@ -66,27 +66,27 @@ model Merchant {
   phone_number String @unique
   password     String
 
-  ktp            String @unique
-  ktp_url        String
-  place_of_birth String
-  date_of_birth  String
-  address_ktp    String
-  self_photo_url String
+  ktp            String? @unique
+  ktp_url        String?
+  place_of_birth String?
+  date_of_birth  String?
+  address_ktp    String?
+  self_photo_url String?
 
-  bank_name       String
-  account_number  String
-  owner_name      String
+  bank_name       String?
+  account_number  String?
+  owner_name      String?
   saving_book_url String?
 
   status MerchantStatus @default(TUTUP)
 
-  merchant_name     String
-  category_merchant String
+  merchant_name     String?
+  category_merchant String?
 
-  address_line String
-  city         String
-  state        String
-  postal_code  String
+  address_line String?
+  city         String?
+  state        String?
+  postal_code  String?
   latitude     Float?
   longitude    Float?
 
@@ -114,19 +114,19 @@ model Courier {
   phone_number String @unique
   password     String
 
-  date_of_birth       DateTime
-  address_ktp         String
-  ktp                 String
-  ktp_url             String
-  selfie_with_sim_url String
-  profile_url         String
+  date_of_birth       DateTime?
+  address_ktp         String?
+  ktp                 String?
+  ktp_url             String?
+  selfie_with_sim_url String?
+  profile_url         String?
 
-  vehicle_brand       String
-  vehicle_color       String
-  vehicle_speed       Int
-  registration_number String
-  license_plate       String
-  license_url         String
+  vehicle_brand       String?
+  vehicle_color       String?
+  vehicle_speed       Int?
+  registration_number String?
+  license_plate       String?
+  license_url         String?
 
   status KurirStatus @default(OFFLINE)
 
