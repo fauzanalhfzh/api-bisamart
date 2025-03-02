@@ -29,8 +29,8 @@ export class UserController {
   @Post('/auth/register')
   @HttpCode(200)
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Register new user' })
+  @UseInterceptors(FileInterceptor('file'))
   async register(
     @Body() request: RegisterUserRequest,
   ): Promise<WebResponse<UserResponse>> {

@@ -12,7 +12,7 @@ import { Logger } from 'winston';
 import { UserValidation } from './user.validation';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuid } from 'uuid';
-import { User } from '@prisma/client';
+import { Roles, User } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -28,8 +28,7 @@ export class UserService {
       name: user.name,
       phone_number: user.phone_number,
       email: user.email,
-      ratings: user.ratings,
-      total_order: user.total_order,
+      roles: user.roles,
       created_at: user.created_at,
       updated_at: user.updated_at,
     };
@@ -47,30 +46,34 @@ export class UserService {
     const registerRequest: RegisterUserRequest =
       this.validationService.validate(UserValidation.REGISTER, request);
 
-    const totalUserWithSamePhoneNumber = await this.prismaService.user.count({
-      where: {
-        phone_number: registerRequest.phone_number,
-      },
-    });
-
-    const totalUserWithSamePhoneEmail = await this.prismaService.user.count({
-      where: {
-        email: registerRequest.email
-      }
-    })
+    const [totalUserWithSamePhoneNumber, totalUserWithSameEmail] =
+      await Promise.all([
+        this.prismaService.user.count({
+          where: { phone_number: registerRequest.phone_number },
+        }),
+        this.prismaService.user.count({
+          where: { email: registerRequest.email },
+        }),
+      ]);
 
     if (totalUserWithSamePhoneNumber != 0) {
       throw new HttpException('Phone number already exist', 400);
     }
 
-    if (totalUserWithSamePhoneEmail != 0) {
+    if (totalUserWithSameEmail != 0) {
       throw new HttpException('Email already exist', 400);
     }
 
     registerRequest.password = await bcrypt.hash(registerRequest.password, 10);
 
     const user = await this.prismaService.user.create({
-      data: registerRequest,
+      data: {
+        name: registerRequest.name,
+        email: registerRequest.email,
+        phone_number: registerRequest.phone_number,
+        password: registerRequest.password,
+        roles: registerRequest.roles as Roles, 
+      },
     });
 
     return this.toUserResponse(user);
@@ -86,7 +89,7 @@ export class UserService {
 
     let user = await this.prismaService.user.findUnique({
       where: {
-        email: loginRequest.email,
+        phone_number: loginRequest.phone_number,
       },
     });
 
@@ -105,7 +108,7 @@ export class UserService {
 
     user = await this.prismaService.user.update({
       where: {
-        email: loginRequest.email,
+        phone_number: loginRequest.phone_number,
       },
       data: {
         token: uuid(),
@@ -140,7 +143,7 @@ export class UserService {
 
     const result = await this.prismaService.user.update({
       where: {
-        email: user.email,
+        phone_number: user.phone_number,
       },
       data: user,
     });

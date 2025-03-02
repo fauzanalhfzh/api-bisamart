@@ -1,38 +1,40 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Roles } from '@prisma/client';
 
 export class RegisterUserRequest {
-  @ApiProperty({ example: '0812345678' })
+  @ApiProperty({ example: 'Bisa People 1' })
+  name: string;
+  @ApiProperty({ example: '62812345678' })
   phone_number: string;
-  @ApiProperty({ example: 'test@example.com' })
+  @ApiProperty({ example: 'bisa@example.com' })
   email: string;
   @ApiProperty({ example: 'test123' })
   password: string;
-  @ApiProperty({ example: 'John Doe' })
-  name: string;
+  @ApiProperty({ example: Roles.CUSTOMER})
+  roles: Roles;
 }
 
 export class LoginUserRequest {
-  @ApiProperty({ example: 'test@example.com' })
-  email: string;
+  @ApiProperty({ example: '62812345678' })
+  phone_number: string;
   @ApiProperty({ example: 'test123' })
   password: string;
 }
 
 export class UpdateUserRequest {
-  @ApiProperty({ example: 'Zen tambah ganteng' })
+  @ApiProperty({ example: 'Bisa People Update', required: false })
   name?: string;
-  @ApiProperty({ example: 'updatepassword' })
+  @ApiProperty({ example: 'test123update', required: false })
   password?: string;
 }
 
 export class UserResponse {
-  id: string;
+  id: number;
   name: string;
   phone_number: string;
   email: string;
-  ratings: number;
-  total_order: number;
+  roles: string;
+  token?: string;
   created_at: Date;
   updated_at: Date;
-  token?: string;
 }
