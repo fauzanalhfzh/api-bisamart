@@ -16,6 +16,7 @@ import {
   RegisterUserRequest,
   UpdateUserRequest,
   UserResponse,
+  VerifiedUserRequest,
 } from '../model/user.model';
 import { Auth } from '../common/auth.decorator';
 import { User } from '@prisma/client';
@@ -55,6 +56,8 @@ export class UserController {
     };
   }
 
+
+
   @Get('/current')
   @HttpCode(200)
   @ApiSecurity('Authorization')
@@ -66,6 +69,33 @@ export class UserController {
     return {
       data: result,
     };
+  }
+
+  @Patch('/auth/send-otp')
+  @HttpCode(200)
+  @ApiSecurity('Authorization')
+  @ApiOperation({ summary: 'send OTP user' })
+  async verified(
+    @Auth() user: User,
+  ) {
+    const result = await this.userService.sendOtp(user);
+    return {
+      data: result,
+    };
+  }
+  
+  @Post('/auth/verify-otp')
+  @ApiSecurity('Authorization')
+  @ApiOperation({ summary: 'Verifikasi OTP untuk user' })
+  async verifyOtp(
+    @Auth() user: User,
+    @Body() request: VerifiedUserRequest,
+    
+  ) {
+    const result = await this.userService.verifiedOtp(user, request);
+    return {
+      data: result
+    }
   }
 
   @Patch('/current')

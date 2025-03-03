@@ -10,8 +10,11 @@ export class RegisterUserRequest {
   email: string;
   @ApiProperty({ example: 'test123' })
   password: string;
-  @ApiProperty({ example: Roles.CUSTOMER})
-  roles: Roles;
+}
+
+export class VerifiedUserRequest{
+  @ApiProperty()
+  otp: string;
 }
 
 export class LoginUserRequest {
@@ -34,6 +37,7 @@ export class UserResponse {
   phone_number: string;
   email: string;
   roles: string;
+  is_verified: boolean;
   token?: string;
   created_at: Date;
   updated_at: Date;

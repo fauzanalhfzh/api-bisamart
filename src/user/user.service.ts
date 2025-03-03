@@ -7,12 +7,14 @@ import {
   RegisterUserRequest,
   UpdateUserRequest,
   UserResponse,
+  VerifiedUserRequest,
 } from 'src/model/user.model';
 import { Logger } from 'winston';
 import { UserValidation } from './user.validation';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuid } from 'uuid';
-import { Roles, User } from '@prisma/client';
+import { User } from '@prisma/client';
+import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class UserService {
@@ -29,6 +31,7 @@ export class UserService {
       phone_number: user.phone_number,
       email: user.email,
       roles: user.roles,
+      is_verified: user.is_verified,
       created_at: user.created_at,
       updated_at: user.updated_at,
     };
@@ -72,7 +75,6 @@ export class UserService {
         email: registerRequest.email,
         phone_number: registerRequest.phone_number,
         password: registerRequest.password,
-        roles: registerRequest.roles as Roles, 
       },
     });
 
@@ -94,7 +96,7 @@ export class UserService {
     });
 
     if (!user) {
-      throw new HttpException('Email or password is invalid', 401);
+      throw new HttpException('Phone number or password is invalid', 401);
     }
 
     const isPasswordValid = await bcrypt.compare(
@@ -103,7 +105,7 @@ export class UserService {
     );
 
     if (!isPasswordValid) {
-      throw new HttpException('Email or password is invalid', 401);
+      throw new HttpException('Phone number or password is invalid', 401);
     }
 
     user = await this.prismaService.user.update({
@@ -116,6 +118,87 @@ export class UserService {
     });
 
     return this.toUserResponse(user);
+  }
+
+  private async createOtpEmail(email: string, otp: string) {
+    // Konfigurasi SMTP
+    const transporter = nodemailer.createTransport({
+      service: 'gmail', // Bisa diganti ke SMTP lain
+      auth: {
+        user: process.env.SMTP_USER, // Email pengirim
+        pass: process.env.SMTP_PASS, // Password email pengirim
+      },
+    });
+
+    // Isi email
+    const mailOptions = {
+      from: process.env.SMTP_USER,
+      to: email,
+      subject: 'Kode OTP Verifikasi Bisamart',
+      text: `Kode OTP Anda adalah: ${otp}. Berlaku selama 5 menit.`,
+    };
+
+    // Kirim email
+    await transporter.sendMail(mailOptions);
+    this.logger.debug(`OTP terkirim ke ${email}`);
+  }
+
+  async sendOtp(user: User) {
+    this.logger.debug(`UserService.sendOtpUser ( ${JSON.stringify(user)})`);
+
+    const otp = Math.floor(10000 + Math.random() * 90000).toString();
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // Expire dalam 5 menit
+
+    // 2️⃣ Simpan OTP ke database
+    await this.prismaService.userOTP.upsert({
+      where: { user_id: user.id },
+      update: { otp, expiresAt },
+      create: { user_id: user.id, otp, expiresAt },
+    });
+
+    // 3️⃣ Kirim OTP ke email pengguna
+    await this.createOtpEmail(user.email, otp);
+
+    return {
+      message: 'OTP telah dikirim ke email Anda',
+    };
+  }
+
+  async verifiedOtp(user: User, request: VerifiedUserRequest) {
+    this.logger.debug(`UserService.verifiedOtpUser ( ${JSON.stringify(user)})`);
+
+    const verifiedRequest: VerifiedUserRequest =
+      this.validationService.validate(UserValidation.VERIFIED, request);
+
+
+    const userOtp = await this.prismaService.userOTP.findUnique({
+      where: { user_id: user.id },
+    });
+
+    if (
+      !userOtp ||
+      userOtp.otp !== verifiedRequest.otp ||
+      userOtp.expiresAt < new Date()
+    ) {
+
+      throw new HttpException('OTP tidak valid atau sudah kedaluwarsa', 401);
+    }
+
+    // Hapus OTP setelah verifikasi berhasil
+    await this.prismaService.userOTP.delete({
+      where: { user_id: user.id },
+    });
+
+    await this.prismaService.user.update({
+      where: { id: user.id },
+      data: {
+        is_verified: true,
+      },
+    });
+
+    return {
+      message: 'Verifikasi berhasil',
+    };
   }
 
   async get(user: User): Promise<UserResponse> {
