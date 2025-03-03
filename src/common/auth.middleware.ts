@@ -14,25 +14,9 @@ export class AuthMiddleware implements NestMiddleware {
         },
       });
 
-      const courier = await this.prismaService.courier.findFirst({
-        where: {
-          token: token,
-        },
-      });
-
-      const merchant = await this.prismaService.merchant.findFirst({
-        where: {
-          token: token,
-        },
-      });
-
       if (user) {
         req.user = user;
-      } else if (courier) {
-        req.courier = courier;
-      } else if (merchant) {
-        req.merchant = merchant;
-      }
+      } 
     }
 
     next();
