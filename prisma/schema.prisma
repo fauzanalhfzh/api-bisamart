@@ -35,22 +35,36 @@ model User {
   id Int @id @default(autoincrement())
 
   name         String
-  email        String   @unique
-  phone_number String   @unique
+  email        String  @unique
+  phone_number String  @unique
   password     String
-  roles        Roles @default(CUSTOMER)
+  roles        Roles   @default(CUSTOMER)
+  is_verified  Boolean @default(false)
 
   token String?
+
+  OTP UserOTP[] @relation("user_otp")
 
   Customer  Customer? @relation("user_customer")
   Merchant  Merchant? @relation("user_merchant")
   Courier   Courier?  @relation("user_courier")
   Addresses Address[] @relation("user_address")
 
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   @@map("users")
+}
+
+model UserOTP {
+  id        Int      @id @default(autoincrement())
+  user_id   Int      @unique
+  otp       String
+  expiresAt DateTime
+
+  User User @relation("user_otp", fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_otp")
 }
 
 model Customer {
@@ -58,7 +72,6 @@ model Customer {
 
   user_id       Int     @unique
   photo_profile String?
-  is_verified   Boolean @default(false)
 
   ratings Float @default(0)
 
@@ -66,7 +79,7 @@ model Customer {
   pending_order Int @default(0)
   cancel_order  Int @default(0)
 
-  User      User      @relation("user_customer", fields: [user_id], references: [id])
+  User User @relation("user_customer", fields: [user_id], references: [id])
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -77,9 +90,8 @@ model Customer {
 model Merchant {
   id Int @id @default(autoincrement())
 
-  user_id              Int     @unique
-  merchant_category_id Int     @unique
-  is_verified          Boolean @default(false)
+  user_id              Int @unique
+  merchant_category_id Int @unique
 
   ktp              String @unique
   ktp_photo        String
@@ -118,8 +130,7 @@ model Merchant {
 model Courier {
   id Int @id @default(autoincrement())
 
-  user_id     Int     @unique
-  is_verified Boolean @default(false)
+  user_id Int @unique
 
   date_of_birth         DateTime
   address_ktp           String
@@ -180,10 +191,10 @@ model Address {
 
   is_primary Boolean
 
-  User User?  @relation("user_address", fields: [user_id], references: [id])
+  User User? @relation("user_address", fields: [user_id], references: [id])
 
-  created_at DateTime   @default(now())
-  updated_at DateTime   @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   @@map("addresses")
 }
@@ -225,7 +236,7 @@ model Promo {
 model Product {
   id Int @id @default(autoincrement())
 
-  image   String
+  image       String
   name        String
   description String?
 
