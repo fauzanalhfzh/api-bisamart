@@ -71,9 +71,13 @@ model UserOTP {
 model PasswordResetToken {
   id        String   @id @default(uuid())
   user_id    Int      @unique
+  
   token     String
   expiresAt DateTime
+  
   user      User     @relation("reset_password", fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_token")
 }
 
 model Customer {
