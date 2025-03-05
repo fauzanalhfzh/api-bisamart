@@ -12,8 +12,10 @@ import { UserService } from './user.service';
 import { WebResponse } from '../model/web.model';
 import { ApiConsumes, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import {
+  ForgotPasswordRequest,
   LoginUserRequest,
   RegisterUserRequest,
+  ResetPasswordRequest,
   UpdateUserRequest,
   UserResponse,
   VerifiedUserRequest,
@@ -97,6 +99,21 @@ export class UserController {
       data: result
     }
   }
+
+  @Post('/forgot-password')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Send email for forgot password' })
+  async forgotPassword(@Body() request: ForgotPasswordRequest) {
+    return this.userService.forgotPassword(request);
+  }
+  
+  @Post('/reset-password')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Reset password' })
+  async resetPassword(@Body() request: ResetPasswordRequest) {
+    return this.userService.resetPassword(request);
+  }
+
 
   @Patch('/current')
   @HttpCode(200)

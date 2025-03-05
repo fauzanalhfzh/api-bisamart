@@ -3,8 +3,10 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from '../common/prisma.service';
 import { ValidationService } from '../common/validation.service';
 import {
+  ForgotPasswordRequest,
   LoginUserRequest,
   RegisterUserRequest,
+  ResetPasswordRequest,
   UpdateUserRequest,
   UserResponse,
   VerifiedUserRequest,
@@ -12,6 +14,7 @@ import {
 import { Logger } from 'winston';
 import { UserValidation } from './user.validation';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { v4 as uuid } from 'uuid';
 import { User } from '@prisma/client';
 import * as nodemailer from 'nodemailer';
@@ -170,7 +173,6 @@ export class UserService {
     const verifiedRequest: VerifiedUserRequest =
       this.validationService.validate(UserValidation.VERIFIED, request);
 
-
     const userOtp = await this.prismaService.userOTP.findUnique({
       where: { user_id: user.id },
     });
@@ -180,7 +182,6 @@ export class UserService {
       userOtp.otp !== verifiedRequest.otp ||
       userOtp.expiresAt < new Date()
     ) {
-
       throw new HttpException('OTP tidak valid atau sudah kedaluwarsa', 401);
     }
 
@@ -232,6 +233,107 @@ export class UserService {
     });
 
     return this.toUserResponse(result);
+  }
+
+  async forgotPassword(request: ForgotPasswordRequest) {
+    const user = await this.prismaService.user.findUnique({
+      where: { email: request.email },
+    });
+
+    if (!user) {
+      throw new HttpException('Email tidak terdaftar.', 400);
+    }
+
+    // Hapus token lama jika ada
+    await this.prismaService.passwordResetToken.deleteMany({
+      where: { user_id: user.id },
+    });
+
+    // Generate token reset password (random string)
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = await bcrypt.hash(resetToken, 10);
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 15); // Token berlaku 15 menit
+
+    // Simpan token ke database
+    await this.prismaService.passwordResetToken.create({
+      data: {
+        user_id: user.id,
+        token: hashedToken,
+        expiresAt,
+      },
+    });
+
+    // Kirim email reset password
+    const resetLink = `http://localhost:3000/api/reset-password?token=${resetToken}&email=${request.email}`;
+    await this.sendResetEmail(user.email, resetLink);
+
+    return { message: 'Link reset password telah dikirim ke email Anda.' };
+  }
+
+  private async sendResetEmail(email: string, resetLink: string) {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.SMTP_USER,
+      to: email,
+      subject: 'Reset Password - Bisamart',
+      html: `
+        <p>Halo,</p>
+        <p>Anda telah meminta reset password untuk akun Anda. Klik link di bawah untuk mengatur ulang password Anda:</p>
+        <p><a href="${resetLink}" style="color: blue;">Reset Password</a></p>
+        <p>Link ini hanya berlaku selama 15 menit.</p>
+        <p>Jika Anda tidak meminta reset password, abaikan email ini.</p>
+        <br>
+        <p>Terima kasih,</p>
+        <p><strong>Tim Bisamart</strong></p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+  }
+
+  async resetPassword(request: ResetPasswordRequest) {
+    // Cari token berdasarkan user_id
+    const passwordReset = await this.prismaService.passwordResetToken.findFirst(
+      {
+        where: { user_id: request.user_id },
+      },
+    );
+
+    // Validasi token dengan bcrypt
+    if (
+      !passwordReset ||
+      !(await bcrypt.compare(request.token, passwordReset.token)) ||
+      passwordReset.expiresAt < new Date()
+    ) {
+      throw new HttpException('Token tidak valid atau sudah kedaluwarsa.', 400);
+    }
+
+    // Hash password baru
+    const hashedPassword = await bcrypt.hash(request.new_password, 10);
+
+    // Update password pengguna
+    await this.prismaService.user.update({
+      where: { id: passwordReset.user_id },
+      data: { password: hashedPassword },
+    });
+
+    // Hapus token reset password setelah digunakan
+    await this.prismaService.passwordResetToken.delete({
+      where: { user_id: passwordReset.user_id },
+    });
+
+    return {
+      message:
+        'Password berhasil direset. Silakan login dengan password baru Anda.',
+    };
   }
 
   async logout(user: User): Promise<UserResponse> {

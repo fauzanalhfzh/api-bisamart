@@ -24,6 +24,20 @@ export class LoginUserRequest {
   password: string;
 }
 
+export class ForgotPasswordRequest {
+  @ApiProperty({ example: 'bisa@example.com' })
+  email: string;
+}
+
+export class ResetPasswordRequest {
+  @ApiProperty({ example: 1 })
+  user_id: number;
+  @ApiProperty({ example: 'f3a1b6e9c2d5f8e0a7b3c6d9e4f2a1b0' })
+  token: string;
+  @ApiProperty({ example: 'passwordupdate' })
+  new_password: string;
+}
+
 export class UpdateUserRequest {
   @ApiProperty({ example: 'Bisa People Update', required: false })
   name?: string;
