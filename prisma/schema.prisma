@@ -44,6 +44,7 @@ model User {
   token String?
 
   OTP UserOTP[] @relation("user_otp")
+  ResetPassword PasswordResetToken[] @relation("reset_password")
 
   Customer  Customer? @relation("user_customer")
   Merchant  Merchant? @relation("user_merchant")
@@ -65,6 +66,14 @@ model UserOTP {
   User User @relation("user_otp", fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("user_otp")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  user_id    Int      @unique
+  token     String
+  expiresAt DateTime
+  user      User     @relation("reset_password", fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model Customer {
