@@ -21,7 +21,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { Auth } from '../common/auth.decorator';
-import { Merchant } from '@prisma/client';
+import { Merchant, User } from '@prisma/client';
 import {
   CreateProductRequest,
   ProductResponse,
@@ -43,14 +43,14 @@ export class ProductController {
     FileFieldsInterceptor(
       [
         {
-          name: 'image_url',
+          name: 'image',
           maxCount: 1,
         },
       ],
       {
         storage: diskStorage({
           destination: (req, file, cb) => {
-            if (file.fieldname === 'image_url') {
+            if (file.fieldname === 'image') {
               cb(null, './public/products');
             }
           },
@@ -65,12 +65,12 @@ export class ProductController {
     ),
   )
   async createProduct(
-    @Auth() merchant: Merchant,
+    @Auth() user: User,
     @Body() request: CreateProductRequest,
-    @UploadedFiles() file: { image_url: Express.Multer.File[] },
+    @UploadedFiles() file: { image: Express.Multer.File[] },
   ): Promise<WebResponse<ProductResponse>> {
     const result = await this.productService.createProduct(
-      merchant,
+      user,
       request,
       file,
     );
@@ -88,14 +88,14 @@ export class ProductController {
     FileFieldsInterceptor(
       [
         {
-          name: 'image_url',
+          name: 'image',
           maxCount: 1,
         },
       ],
       {
         storage: diskStorage({
           destination: (req, file, cb) => {
-            if (file.fieldname === 'image_url') {
+            if (file.fieldname === 'image') {
               cb(null, './public/products');
             }
           },
@@ -112,8 +112,8 @@ export class ProductController {
   async updateProduct(
     @Auth() merchant: Merchant,
     @Body() request: UpdateProductRequest,
-    @Param('id') id: string,
-    @UploadedFiles() files: { image_url: Express.Multer.File[] },
+    @Param('id') id: number,
+    @UploadedFiles() files: { image: Express.Multer.File[] },
   ): Promise<WebResponse<ProductResponse>> {
     const product = await this.productService.checkProductMustExists(id);
     const result = await this.productService.editProduct(
@@ -142,7 +142,7 @@ export class ProductController {
   @HttpCode(200)
   @ApiOperation({ summary: 'Get product by id' })
   async getProductById(
-    @Param('id') id: string,
+    @Param('id') id: number,
   ): Promise<WebResponse<ProductResponse>> {
     const result = await this.productService.getProductById(id);
     return {
@@ -154,7 +154,7 @@ export class ProductController {
   @HttpCode(200)
   @ApiOperation({ summary: 'Get all product by merchant ID' })
   async getProductByMerchantId(
-    @Param('id') id: string,
+    @Param('id') id: number,
   ): Promise<WebResponse<ProductResponse[]>> {
     const result = await this.productService.getProductByMerchantId(id);
     return {
@@ -166,7 +166,7 @@ export class ProductController {
   @HttpCode(200)
   @ApiOperation({ summary: 'Get all product by category' })
   async getProductByCategory(
-    @Param('id') id: string,
+    @Param('id') id: number,
   ): Promise<WebResponse<ProductResponse[]>> {
     const result = await this.productService.getProductByCategory(id);
     return {
@@ -179,7 +179,7 @@ export class ProductController {
   @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'Delete product by id' })
   async deleteProductById(
-    @Param('id') id: string,
+    @Param('id') id: number,
   ): Promise<WebResponse<boolean>> {
     await this.productService.deleteProductById(id);
     return {

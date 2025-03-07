@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateProductRequest {
-  @ApiProperty({ example: '' })
-  image_url: string;
+  @ApiProperty({ type: 'string', format: 'binary' })
+  image: any;
   @ApiProperty({ example: 'Paku 7cm' })
   name: string;
   @ApiProperty({ example: '1 kg khusus kayu' })
@@ -15,15 +15,15 @@ export class CreateProductRequest {
   netto: number;
   @ApiProperty({ example: 10 })
   discount: number;
-  @ApiProperty({ example: 'b4cd5cf0-3a75-42b6-a2e1-de1999f26114' })
-  merchant_id: string;
-  @ApiProperty({ example: 'b4cd5cf0-3a75-42b6-a2e1-de1999f26114' })
-  category_id: string;
+  @ApiProperty({ example: 1 })
+  merchant_id: number;
+  @ApiProperty({ example: 1 })
+  category_id: number;
 }
 
 export class UpdateProductRequest {
-  @ApiProperty({ example: '' })
-  image_url?: string;
+  @ApiProperty({ type: 'string', format: 'binary' })
+  image?: any;
   @ApiProperty({ example: 'Paku 9cm' })
   name?: string;
   @ApiProperty({ example: '2 kg khusus kayu' })
@@ -41,16 +41,19 @@ export class UpdateProductRequest {
 }
 
 export class ProductResponse {
-  id: string;
-  image_url: string;
+  id: number;
+  merchant_id: number;
+  category_id: number;
+
+  image: string;
   name: string;
   description: string;
+  
   price: number;
   stock: number;
   netto: number;
   discount: number;
-  merchant_id: string;
-  category_id: string;
+  
   created_at: Date;
   updated_at: Date;
 }

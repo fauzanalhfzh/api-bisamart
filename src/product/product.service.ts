@@ -1,5 +1,5 @@
 import { HttpException, Inject, Injectable } from '@nestjs/common';
-import { Merchant, Product } from '@prisma/client';
+import { Merchant, Product, Roles, User } from '@prisma/client';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from '../common/prisma.service';
 import { ValidationService } from '../common/validation.service';
@@ -30,7 +30,7 @@ export class ProductService {
       id: product.id,
       name: product.name,
       description: product.description,
-      image_url: product.image_url,
+      image: product.image,
       price: product.price,
       stock: product.stock,
       netto: product.netto,
@@ -42,7 +42,7 @@ export class ProductService {
     };
   }
 
-  async checkMerchantMustExists(id: string): Promise<Merchant> {
+  async checkMerchantMustExists(id: number): Promise<Merchant> {
     const merchant = await this.prismaService.merchant.findFirst({
       where: {
         id: id,
@@ -56,7 +56,7 @@ export class ProductService {
     return merchant;
   }
 
-  async checkProductMustExists(id: string): Promise<Product> {
+  async checkProductMustExists(id: number): Promise<Product> {
     const product = await this.prismaService.product.findFirst({
       where: {
         id: id,
@@ -71,21 +71,39 @@ export class ProductService {
   }
 
   async createProduct(
-    merchant: Merchant,
+    user: User,
     request: CreateProductRequest,
     files: {
-      image_url?: Express.Multer.File[];
+      image?: Express.Multer.File[];
     },
   ): Promise<ProductResponse> {
     this.logger.debug(
-      `MartService.create-product(${JSON.stringify(merchant)}, ${JSON.stringify(request)})`,
+      `MartService.create-product(${JSON.stringify(user)}, ${JSON.stringify(request)})`,
     );
+
+    if (user.roles !== Roles.MERCHANT) {
+      throw new HttpException('Forbidden: Only merchants can create products.', 401);
+    }
+
+    if (typeof request.merchant_id !== 'number') {
+      request.merchant_id = parseFloat(request.merchant_id as unknown as string);
+      if (isNaN(request.merchant_id)) {
+        throw new HttpException('Merchant ID harus berupa number.', 400);
+      }
+    }
+
+    if (typeof request.category_id !== 'number') {
+      request.category_id = parseFloat(request.category_id as unknown as string);
+      if (isNaN(request.category_id)) {
+        throw new HttpException('Category ID harus berupa number.', 400);
+      }
+    }
 
     // Pastikan price adalah number
     if (typeof request.price !== 'number') {
       request.price = parseFloat(request.price as unknown as string);
       if (isNaN(request.price)) {
-        throw new Error('Price harus berupa angka.');
+        throw new HttpException('Price harus berupa number.', 400);
       }
     }
 
@@ -93,7 +111,7 @@ export class ProductService {
     if (typeof request.stock !== 'number') {
       request.stock = parseInt(request.stock as unknown as string, 10);
       if (isNaN(request.stock)) {
-        throw new Error('Stock harus berupa angka.');
+        throw new HttpException('Stock harus berupa number.', 400);
       }
     }
 
@@ -101,7 +119,7 @@ export class ProductService {
     if (typeof request.netto !== 'number') {
       request.netto = parseFloat(request.netto as unknown as string);
       if (isNaN(request.netto)) {
-        throw new Error('Netto harus berupa angka.');
+        throw new HttpException('Netto harus berupa number.', 400);
       }
     }
 
@@ -109,7 +127,7 @@ export class ProductService {
     if (typeof request.discount !== 'number') {
       request.discount = parseFloat(request.discount as unknown as string);
       if (isNaN(request.discount)) {
-        throw new Error('Discount harus berupa angka.');
+        throw new HttpException('Discount harus berupa number.', 400);
       }
     }
 
@@ -118,10 +136,10 @@ export class ProductService {
       request,
     );
 
-    if (files.image_url?.[0]) {
-      createRequest.image_url = `/public/products/${files.image_url[0].filename}`;
+    if (files.image?.[0]) {
+      createRequest.image = `/public/products/${files.image[0].filename}`;
     } else {
-      this.logger.warn('File image_url tidak ditemukan atau kosong.');
+      this.logger.warn('File image tidak ditemukan atau kosong.');
       throw new Error('Image file is required.');
     }
 
@@ -141,7 +159,7 @@ export class ProductService {
     return products.map((product) => this.toProductResponse(product));
   }
 
-  async getProductByMerchantId(id: string): Promise<ProductResponse[]> {
+  async getProductByMerchantId(id: number): Promise<ProductResponse[]> {
     this.logger.debug(
       `MartService.getProductByMerchantId(${JSON.stringify(id)})`,
     );
@@ -161,7 +179,7 @@ export class ProductService {
     return products.map((product) => this.toProductResponse(product));
   }
 
-  async getProductById(id: string): Promise<ProductResponse> {
+  async getProductById(id: number): Promise<ProductResponse> {
     this.logger.debug(`MartService.getProductById(${JSON.stringify(id)})`);
 
     const result = await this.checkProductMustExists(id);
@@ -169,7 +187,7 @@ export class ProductService {
     return this.toProductResponse(result);
   }
 
-  async getProductByCategory(id: string): Promise<ProductResponse[]> {
+  async getProductByCategory(id: number): Promise<ProductResponse[]> {
     this.logger.debug(
       `MartService.getProductsByCategory(${JSON.stringify(id)})`,
     );
@@ -185,7 +203,7 @@ export class ProductService {
 
     return products.map((product) => ({
       id: product.id,
-      image_url: product.image_url,
+      image: product.image,
       name: product.name,
       description: product.description,
       price: product.price,
@@ -203,9 +221,9 @@ export class ProductService {
     merchant: Merchant,
     product: Product,
     request: UpdateProductRequest,
-    id: string,
+    id: number,
     files: {
-      image_url?: Express.Multer.File[];
+      image?: Express.Multer.File[];
     },
   ): Promise<ProductResponse> {
     this.logger.debug(`UserService.Update(${JSON.stringify(request)})`);
@@ -251,14 +269,14 @@ export class ProductService {
       request,
     );
 
-    if (files.image_url?.[0]) {
+    if (files.image?.[0]) {
       // Hapus gambar sebelumnya
-      const oldImagePath = path.join(process.cwd(), product.image_url);
+      const oldImagePath = path.join(process.cwd(), product.image);
       if (fs.existsSync(oldImagePath)) {
         fs.unlinkSync(oldImagePath);
       }
 
-      updateRequest.image_url = `/public/products/${files.image_url[0].filename}`;
+      updateRequest.image = `/public/products/${files.image[0].filename}`;
     } else {
       this.logger.warn('File image_url tidak ditemukan atau kosong.');
       throw new Error('Image file is required.');
@@ -290,7 +308,7 @@ export class ProductService {
     return this.toProductResponse(result);
   }
 
-  async deleteProductById(id: string): Promise<ProductResponse> {
+  async deleteProductById(id: number): Promise<ProductResponse> {
     this.logger.debug(`MartService.deleteProductById(${JSON.stringify(id)})`);
 
     const product = await this.checkProductMustExists(id);
