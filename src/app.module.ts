@@ -5,6 +5,7 @@ import { SimpleModule } from './simple/simple.module';
 import { CategoryModule } from './category/category.module';
 import { AddressModule } from './address/address.module';
 import { CourierModule } from './courier/courier.module';
+import { MerchantModule } from './merchant/merchant.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { CourierModule } from './courier/courier.module';
     SimpleModule,
     UserModule,
     CourierModule,
+    MerchantModule,
     AddressModule,
     CategoryModule,
   ],
