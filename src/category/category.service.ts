@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Category } from '@prisma/client';
+import { ProducCategory } from '@prisma/client';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from 'src/common/prisma.service';
 import { ValidationService } from 'src/common/validation.service';
@@ -14,7 +14,7 @@ export class CategoryService {
     @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
   ) {}
 
-  toCategoryResponse(category: Category): ProductCategeoryResponse {
+  toCategoryResponse(category: ProducCategory): ProductCategeoryResponse {
     if (!category) {
       throw new Error('Category is undefined or null');
     }
@@ -31,7 +31,7 @@ export class CategoryService {
   async getAllCategory(): Promise<ProductCategeoryResponse[]> {
     this.logger.debug(`BisamartService.getAllCategory()`);
 
-    const categories = await this.prismaService.category.findMany();
+    const categories = await this.prismaService.producCategory.findMany();
 
     // convert to array
     return categories.map((category) => this.toCategoryResponse(category));
