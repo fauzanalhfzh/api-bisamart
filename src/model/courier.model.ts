@@ -1,69 +1,48 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { KurirStatus } from '@prisma/client';
+import { CourierStatus } from '@prisma/client';
 
 export class RegisterCourierRequest {
-  @ApiProperty({ example: 'John Doe' })
-  name: string;
-  @ApiProperty({ example: 'test@example.com' })
-  email: string;
-  @ApiProperty({ example: '0812345678' })
-  phone_number: string;
-  @ApiProperty({ example: 'test123' })
-  password: string;
-  @ApiProperty({
-    example: 'Jl Brigjen Slamet Riyadi 40 RT 001/04, Jawa Tengah',
-  })
-  date_of_birth: Date;
-  @ApiProperty({
-    example: 'Jl Brigjen Slamet Riyadi 40 RT 001/04, Jawa Tengah',
-  })
+  @ApiProperty({ example: '2024-12-25' })
+  date_of_birth: string;
+  @ApiProperty({ example: 'Warnasari, lorem ipsum' })
   address_ktp: string;
   @ApiProperty({ example: '3606762101234' })
   ktp: string;
-  @ApiProperty({ example: '' })
-  ktp_url: string;
-  @ApiProperty({ example: '' })
-  selfie_with_sim_url: string;
-  @ApiProperty({ example: '' })
-  profile_url: string;
-  @ApiProperty({ example: 'Honda Beat' })
+  @ApiProperty({ type: 'string', format: 'binary' })
+  ktp_photo: any;
+  @ApiProperty({ type: 'string', format: 'binary' })
+  selfie_with_sim_photo: any;
+  @ApiProperty({ type: 'string', format: 'binary' })
+  profile_photo: any;
+  @ApiProperty({ example: 'Honda' })
   vehicle_brand: string;
-  @ApiProperty({ example: 'Biru Putih' })
+  @ApiProperty({ example: 'Merah Putih' })
   vehicle_color: string;
-  @ApiProperty({ example: 'Biru Putih' })
+  @ApiProperty({ example: 125 })
   vehicle_speed: number;
-  @ApiProperty({ example: '4546221234822' })
+  @ApiProperty({ example: '081239180313' })
   registration_number: string;
-  @ApiProperty({ example: 'DM 1243 AR' })
+  @ApiProperty({ example: 'A 1234 BC' })
   license_plate: string;
-  @ApiProperty({ example: '' })
-  license_url: string;
-}
-
-export class LoginCourierRequest {
-  @ApiProperty({ example: '0812345678' })
-  phone_number: string;
-  @ApiProperty({ example: 'test123' })
-  password: string;
+  @ApiProperty({ type: 'string', format: 'binary' })
+  license_photo: any;
 }
 
 export class UpdateStatusRequest {
   @ApiProperty({ example: 'ONLINE' })
-  status: KurirStatus;
+  status: CourierStatus;
 }
 
 export class CourierResponse {
-  id: string;
-  name: string;
-  email: string;
-  phone_number: string;
+  id: number;
+  user_id: number;
 
   date_of_birth: Date;
   address_ktp: string;
   ktp: string;
-  ktp_url: string;
-  selfie_with_sim_url: string;
-  profile_url: string;
+  ktp_photo: string;
+  selfie_with_sim_photo: string;
+  profile_photo: string;
 
   vehicle_brand: string;
   vehicle_color: string;
@@ -71,9 +50,9 @@ export class CourierResponse {
 
   registration_number: string;
   license_plate: string;
-  license_url: string;
+  license_photo: string;
 
-  status: KurirStatus;
+  status: CourierStatus;
 
   ratings: number;
   total_earning: number;
@@ -83,5 +62,4 @@ export class CourierResponse {
   created_at: Date;
   updated_at: Date;
 
-  token?: string;
 }
