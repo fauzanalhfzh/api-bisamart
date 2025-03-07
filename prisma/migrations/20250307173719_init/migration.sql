@@ -27,6 +27,26 @@ CREATE TABLE "users" (
 );
 
 -- CreateTable
+CREATE TABLE "user_otp" (
+    "id" SERIAL NOT NULL,
+    "user_id" INTEGER NOT NULL,
+    "otp" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "user_otp_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "password_reset_token" (
+    "id" TEXT NOT NULL,
+    "user_id" INTEGER NOT NULL,
+    "token" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "password_reset_token_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "customers" (
     "id" SERIAL NOT NULL,
     "user_id" INTEGER NOT NULL,
@@ -49,9 +69,9 @@ CREATE TABLE "merchants" (
     "ktp" TEXT NOT NULL,
     "ktp_photo" TEXT NOT NULL,
     "place_of_birth" TEXT NOT NULL,
-    "date_of_birth" TEXT NOT NULL,
+    "date_of_birth" TIMESTAMP(3) NOT NULL,
     "address_ktp" TEXT NOT NULL,
-    "self_photo_photo" TEXT NOT NULL,
+    "self_photo" TEXT NOT NULL,
     "bank_name" TEXT NOT NULL,
     "account_number" TEXT NOT NULL,
     "owner_name" TEXT NOT NULL,
@@ -189,6 +209,12 @@ CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 CREATE UNIQUE INDEX "users_phone_number_key" ON "users"("phone_number");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "user_otp_user_id_key" ON "user_otp"("user_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "password_reset_token_user_id_key" ON "password_reset_token"("user_id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "customers_user_id_key" ON "customers"("user_id");
 
 -- CreateIndex
@@ -207,10 +233,16 @@ CREATE UNIQUE INDEX "couriers_user_id_key" ON "couriers"("user_id");
 CREATE UNIQUE INDEX "couriers_ktp_key" ON "couriers"("ktp");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "addresses_user_id_key" ON "addresses"("user_id");
+CREATE UNIQUE INDEX "merchant_category_name_key" ON "merchant_category"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "product_category_name_key" ON "product_category"("name");
+
+-- AddForeignKey
+ALTER TABLE "user_otp" ADD CONSTRAINT "user_otp_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "password_reset_token" ADD CONSTRAINT "password_reset_token_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "customers" ADD CONSTRAINT "customers_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

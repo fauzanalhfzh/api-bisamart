@@ -109,7 +109,7 @@ model Merchant {
   ktp            String @unique
   ktp_photo      String
   place_of_birth String
-  date_of_birth  String
+  date_of_birth  DateTime
   address_ktp    String
   self_photo     String
 
@@ -179,7 +179,7 @@ model Courier {
 model MerchantCategory {
   id Int @id @default(autoincrement())
 
-  name String
+  name String @unique
 
   Merchant Merchant[] @relation("merchant_category")
 
@@ -266,12 +266,12 @@ model Product {
   updated_at DateTime @updatedAt
 
   merchant Merchant @relation("merchant_product", fields: [merchant_id], references: [id])
-  category Category @relation("product_category", fields: [category_id], references: [id])
+  category ProducCategory @relation("product_category", fields: [category_id], references: [id])
 
   @@map("products")
 }
 
-model Category {
+model ProducCategory {
   id Int @id @default(autoincrement())
 
   name        String  @unique
