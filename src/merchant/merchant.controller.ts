@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   Patch,
@@ -17,13 +16,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
-  LoginMerchantRequest,
   MerchantResponse,
   RegisterMerchantRequest,
   UpdateStatusRequest,
 } from 'src/model/merchant.model';
 import { WebResponse } from 'src/model/web.model';
-import { Merchant } from '@prisma/client';
+import { Merchant, User } from '@prisma/client';
 import { Auth } from 'src/common/auth.decorator';
 import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -37,22 +35,23 @@ export class MerchantController {
   @Post('/auth/register')
   @HttpCode(200)
   @ApiOperation({ summary: 'Register new merchant' })
+  @ApiSecurity('Authorization')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileFieldsInterceptor(
       [
-        { name: 'ktp_url', maxCount: 1 },
-        { name: 'self_photo_url', maxCount: 1 },
-        { name: 'saving_book_url', maxCount: 1 },
+        { name: 'ktp_photo', maxCount: 1 },
+        { name: 'self_photo', maxCount: 1 },
+        { name: 'saving_book_photo', maxCount: 1 },
       ],
       {
         storage: diskStorage({
           destination: (req, file, cb) => {
-            if (file.fieldname === 'ktp_url') {
+            if (file.fieldname === 'ktp_photo') {
               cb(null, './storage/merchant/ktp');
-            } else if (file.fieldname === 'self_photo_url') {
+            } else if (file.fieldname === 'self_photo') {
               cb(null, './storage/merchant/selfie');
-            } else if (file.fieldname === 'saving_book_url') {
+            } else if (file.fieldname === 'saving_book_photo') {
               cb(null, './storage/merchant/book');
             }
           },
@@ -61,13 +60,13 @@ export class MerchantController {
             let prefix = '';
 
             switch (file.fieldname) {
-              case 'ktp_url':
+              case 'ktp_photo':
                 prefix = 'KTP';
                 break;
-              case 'self_photo_url':
+              case 'self_photo':
                 prefix = 'SELFIE';
                 break;
-              case 'saving_book_url':
+              case 'saving_book_photo':
                 prefix = 'SAVINGBOOKS';
                 break;
             }
@@ -80,29 +79,16 @@ export class MerchantController {
     ),
   )
   async register(
+    @Auth() user: User,
     @Body() request: RegisterMerchantRequest,
     @UploadedFiles()
     files: {
-      ktp_url?: Express.Multer.File[];
-      self_photo_url?: Express.Multer.File[];
-      saving_book_url?: Express.Multer.File[];
+      ktp_photo?: Express.Multer.File[];
+      self_photo?: Express.Multer.File[];
+      saving_book_photo?: Express.Multer.File[];
     },
   ): Promise<WebResponse<MerchantResponse>> {
-    const result = await this.merchantService.register(request, files);
-    return {
-      data: result,
-    };
-  }
-
-  @Post('/auth/login')
-  @HttpCode(200)
-  @ApiOperation({ summary: 'login merchant' })
-  @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file'))
-  async login(
-    @Body() request: LoginMerchantRequest,
-  ): Promise<WebResponse<MerchantResponse>> {
-    const result = await this.merchantService.login(request);
+    const result = await this.merchantService.register(user, request, files);
     return {
       data: result,
     };
@@ -112,12 +98,10 @@ export class MerchantController {
   @HttpCode(200)
   @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'Get Merchant data' })
-  @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file'))
   async get(
-    @Auth() merchant: Merchant,
+    @Auth() user: User,
   ): Promise<WebResponse<MerchantResponse>> {
-    const result = await this.merchantService.get(merchant);
+    const result = await this.merchantService.get(user);
     return {
       data: result,
     };
@@ -144,25 +128,13 @@ export class MerchantController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
   async updateStatus(
-    @Auth() merchant: Merchant,
+    @Auth() user: User,
     @Body() request: UpdateStatusRequest,
   ): Promise<WebResponse<MerchantResponse>> {
-    const result = await this.merchantService.updateStatus(merchant, request);
+    const result = await this.merchantService.updateStatus(user, request);
     return {
       data: result,
     };
   }
 
-  @Delete('/auth/logout')
-  @HttpCode(200)
-  @ApiSecurity('Authorization')
-  @ApiOperation({ summary: 'Logout merchant' })
-  @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file'))
-  async logout(@Auth() merchant: Merchant): Promise<WebResponse<boolean>> {
-    await this.merchantService.logout(merchant);
-    return {
-      data: true,
-    };
-  }
 }

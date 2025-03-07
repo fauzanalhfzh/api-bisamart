@@ -1,19 +1,21 @@
-import { HttpException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
 import { ValidationService } from '../common/validation.service';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import {
-  LoginMerchantRequest,
   MerchantResponse,
   RegisterMerchantRequest,
   UpdateStatusRequest,
 } from '../model/merchant.model';
 import { MerchantValidation } from './merchant.validation';
-import * as bcrypt from 'bcrypt';
-import { v4 as uuid } from 'uuid';
-import { Merchant, Product } from '@prisma/client';
-import { ProductResponse } from 'src/model/product.model';
+import { Merchant, Product, User } from '@prisma/client';
 
 @Injectable()
 export class MerchantService {
@@ -26,28 +28,20 @@ export class MerchantService {
   toMerchantResponse(merchant: Merchant): MerchantResponse {
     const merchantResponse: MerchantResponse = {
       id: merchant.id,
-      name: merchant.name,
-      email: merchant.email,
-      phone_number: merchant.phone_number,
+      user_id: merchant.user_id,
+      merchant_category_id: merchant.merchant_category_id,
       ktp: merchant.ktp,
-      ktp_url: merchant.ktp_url,
+      ktp_photo: merchant.ktp_photo,
       place_of_birth: merchant.place_of_birth,
       date_of_birth: merchant.date_of_birth,
       address_ktp: merchant.address_ktp,
-      self_photo_url: merchant.self_photo_url,
+      self_photo: merchant.self_photo,
       bank_name: merchant.bank_name,
       account_number: merchant.account_number,
       owner_name: merchant.owner_name,
-      saving_book_url: merchant.saving_book_url,
+      saving_book_photo: merchant.saving_book_photo,
       status: merchant.status,
       merchant_name: merchant.merchant_name,
-      category_merchant: merchant.category_merchant,
-      address_line: merchant.address_line,
-      city: merchant.city,
-      state: merchant.state,
-      postal_code: merchant.postal_code,
-      latitude: merchant.latitude,
-      longitude: merchant.longitude,
       ratings: merchant.ratings,
       total_earning: merchant.total_earning,
       total_order: merchant.total_order,
@@ -57,35 +51,31 @@ export class MerchantService {
       updated_at: merchant.updated_at,
     };
 
-    if (merchant.token) {
-      merchantResponse.token = merchant.token;
-    }
-
     return merchantResponse;
   }
 
-  toProductResponse(product: Product): ProductResponse {
-    if (!product) {
-      throw new Error('Product is undefined or null');
-    }
+  // toProductResponse(product: Product): ProductResponse {
+  //   if (!product) {
+  //     throw new Error('Product is undefined or null');
+  //   }
 
-    return {
-      id: product.id,
-      image_url: product.image_url,
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      stock: product.stock,
-      netto: product.netto,
-      discount: product.discount,
-      merchant_id: product.merchant_id,
-      category_id: product.category_id,
-      created_at: product.created_at,
-      updated_at: product.updated_at,
-    };
-  }
+  //   return {
+  //     id: product.id,
+  //     image_url: product.image_url,
+  //     name: product.name,
+  //     description: product.description,
+  //     price: product.price,
+  //     stock: product.stock,
+  //     netto: product.netto,
+  //     discount: product.discount,
+  //     merchant_id: product.merchant_id,
+  //     category_id: product.category_id,
+  //     created_at: product.created_at,
+  //     updated_at: product.updated_at,
+  //   };
+  // }
 
-  async checkMerchantMustExists(id: string): Promise<Merchant> {
+  async checkMerchantMustExists(id: number): Promise<Merchant> {
     const merchant = await this.prismaService.merchant.findFirst({
       where: {
         id: id,
@@ -99,7 +89,7 @@ export class MerchantService {
     return merchant;
   }
 
-  async checkProductMustExists(id: string): Promise<Product> {
+  async checkProductMustExists(id: number): Promise<Product> {
     const product = await this.prismaService.product.findFirst({
       where: {
         id: id,
@@ -114,202 +104,139 @@ export class MerchantService {
   }
 
   async register(
+    user: User,
     request: RegisterMerchantRequest,
     files: {
-      ktp_url?: Express.Multer.File[];
-      self_photo_url?: Express.Multer.File[];
-      saving_book_url?: Express.Multer.File[];
+      ktp_photo?: Express.Multer.File[];
+      self_photo?: Express.Multer.File[];
+      saving_book_photo?: Express.Multer.File[];
     },
   ): Promise<MerchantResponse> {
     this.logger.debug(`MartService.register(${JSON.stringify(request)})`);
 
-    if (typeof request.latitude !== 'number') {
-      request.latitude = parseFloat(request.latitude as unknown as string);
-      if (isNaN(request.latitude)) {
-        throw new Error('Latitude harus berupa number.');
+    if (!user.is_verified) {
+      throw new HttpException(
+        'Email harus diverifikasi sebelum mendaftar sebagai Merchant',
+        400,
+      );
+    }
+
+    if (
+      request.merchant_category_id !== undefined &&
+      request.merchant_category_id !== null
+    ) {
+      if (typeof request.merchant_category_id !== 'number') {
+        request.merchant_category_id = parseFloat(
+          request.merchant_category_id as unknown as string,
+        );
+        if (isNaN(request.merchant_category_id)) {
+          throw new Error('Speed harus berupa number.');
+        }
       }
     }
 
-    if (typeof request.longitude !== 'number') {
-      request.longitude = parseFloat(request.longitude as unknown as string);
-      if (isNaN(request.longitude)) {
-        throw new Error('Latitude harus berupa number.');
-      }
-    }
-    
     const registerRequest: RegisterMerchantRequest =
       this.validationService.validate(MerchantValidation.REGISTER, request);
 
-    const totalMartWithSameKTP =
-      await this.prismaService.merchant.count({
-        where: {
-          ktp: registerRequest.ktp,
-        },
-      });
+    const categoryExists = await this.prismaService.merchantCategory.findUnique(
+      {
+        where: { id: registerRequest.merchant_category_id },
+      },
+    );
 
-      const totalMartWithSamePhoneNumber =
-      await this.prismaService.merchant.count({
-        where: {
-          phone_number: registerRequest.phone_number,
-        },
-      });
+    if (!categoryExists) {
+      throw new BadRequestException('Merchant category not found');
+    }
 
-      const totalMartWithSameEmail =
-      await this.prismaService.merchant.count({
-        where: {
-          email: registerRequest.email,
-        },
-      });
+    const totalMartWithSameKTP = await this.prismaService.merchant.count({
+      where: {
+        ktp: registerRequest.ktp,
+      },
+    });
+
+    const existingCourier = await this.prismaService.courier.findUnique({
+      where: { user_id: user.id },
+    });
+
+    if (existingCourier) {
+      throw new HttpException('User sudah terdaftar sebagai Courier', 400);
+    }
 
     if (totalMartWithSameKTP != 0) {
       throw new HttpException('KTP already exist', 400);
     }
 
-    if (totalMartWithSamePhoneNumber != 0) {
-      throw new HttpException('Phone Number already exist', 400);
+    if (files.ktp_photo?.[0]) {
+      registerRequest.ktp_photo = `/storage/merchant/ktp/${files.ktp_photo[0].filename}`;
     }
 
-    if (totalMartWithSameEmail != 0) {
-      throw new HttpException('Email already exist', 400);
+    if (files.saving_book_photo?.[0]) {
+      registerRequest.saving_book_photo = `/storage/merchant/book/${files.saving_book_photo[0].filename}`;
     }
 
-    registerRequest.password = await bcrypt.hash(registerRequest.password, 10);
-
-    if(files.ktp_url?.[0]) {
-      registerRequest.ktp_url = `/storage/merchant/ktp/${files.ktp_url[0].filename}`
+    if (files.self_photo?.[0]) {
+      registerRequest.self_photo = `/storage/merchant/selfie/${files.self_photo[0].filename}`;
     }
 
-    if(files.saving_book_url?.[0]) {
-      registerRequest.saving_book_url = `/storage/merchant/book/${files.saving_book_url[0].filename}`
-    }
-
-    if(files.self_photo_url?.[0]) {
-      registerRequest.self_photo_url = `/storage/merchant/selfie/${files.self_photo_url[0].filename}`
-    }
+    await this.prismaService.user.update({
+      where: { id: user.id},
+      data: { roles: "MERCHANT"}
+    })
 
     const merchant = await this.prismaService.merchant.create({
-      data: registerRequest,
+      data: {
+        user_id: user.id,
+        merchant_category_id: registerRequest.merchant_category_id,
+        ktp: registerRequest.ktp,
+        ktp_photo: registerRequest.ktp_photo,
+        place_of_birth: registerRequest.place_of_birth,
+        date_of_birth: new Date(registerRequest.date_of_birth),
+        address_ktp: registerRequest.address_ktp,
+        self_photo: registerRequest.self_photo,
+        bank_name: registerRequest.bank_name,
+        account_number: registerRequest.account_number,
+        owner_name: registerRequest.owner_name,
+        saving_book_photo: registerRequest.saving_book_photo,
+        merchant_name: registerRequest.merchant_name,
+      },
     });
 
     return this.toMerchantResponse(merchant);
   }
 
-  async login(request: LoginMerchantRequest): Promise<MerchantResponse> {
-    this.logger.debug(`MartService.login(${JSON.stringify(request)})`);
-
-    const loginRequest: LoginMerchantRequest = this.validationService.validate(
-      MerchantValidation.LOGIN,
-      request,
-    );
-
-    let merchant = await this.prismaService.merchant.findUnique({
-      where: {
-        email: loginRequest.email,
+  async get(user: User): Promise<MerchantResponse> {
+    this.logger.debug(`MerchantService.Get( ${JSON.stringify(user)})`);
+    const merchant = await this.prismaService.merchant.findUnique({
+      where: { user_id: user.id },
+      include: {
+        User: true,
       },
     });
 
     if (!merchant) {
-      throw new HttpException('Email or password is invalid', 401);
+      throw new NotFoundException('Merchant tidak ditemukan.');
     }
-
-    const isPasswordValid = await bcrypt.compare(
-      loginRequest.password,
-      merchant.password,
-    );
-
-    if (!isPasswordValid) {
-      throw new HttpException('Email or password is invalid', 401);
-    }
-
-    merchant = await this.prismaService.merchant.update({
-      where: {
-        email: loginRequest.email,
-      },
-      data: {
-        token: uuid(),
-      },
-    });
 
     return this.toMerchantResponse(merchant);
   }
 
-  async get(merchant: Merchant): Promise<MerchantResponse> {
-    this.logger.debug(`MerchantService.Get( ${JSON.stringify(merchant)})`);
-    return this.toMerchantResponse(merchant);
-  }
-
-  // async update(
-  //   merchant: Merchant,
-  //   request: UpdateMerchantRequest,
-  // ): Promise<MerchantResponse> {
-  //   this.logger.debug(
-  //     `MerchantService.Update(${JSON.stringify(merchant)}, ${JSON.stringify(request)})`,
-  //   );
-
-  //   const updateRequest: UpdateMerchantRequest =
-  //     this.validationService.validate(
-  //       MerchantValidation.UPDATE_MERCHANT,
-  //       request,
-  //     );
-
-  //   if (updateRequest.address) {
-  //     merchant.address = updateRequest.address;
-  //   }
-
-  //   if (updateRequest.open_time) {
-  //     merchant.open_time = updateRequest.open_time;
-  //   }
-
-  //   if (updateRequest.close_time) {
-  //     merchant.close_time = updateRequest.close_time;
-  //   }
-
-  //   if (updateRequest.password) {
-  //     merchant.password = updateRequest.password;
-  //   }
-
-  //   const result = await this.prismaService.merchant.update({
-  //     where: {
-  //       email: merchant.email,
-  //     },
-  //     data: merchant,
-  //   });
-
-  //   return this.toMerchantResponse(result);
-  // }
-
+  //! create service for adding operating hours
+  
   async updateStatus(
-    merchant: Merchant,
+    user: User,
     request: UpdateStatusRequest,
   ): Promise<MerchantResponse> {
     this.logger.debug(
-      `MerchantService.UpdateStatus(${JSON.stringify(merchant)}, ${JSON.stringify(request)})`,
+      `MerchantService.UpdateStatus(${JSON.stringify(user)}, ${JSON.stringify(request)})`,
     );
 
     const updateStatusRequest: UpdateStatusRequest =
       this.validationService.validate(MerchantValidation.UPDATESTATUS, request);
 
-    if (updateStatusRequest.status) {
-      merchant.status = updateStatusRequest.status;
-    }
-
     const result = await this.prismaService.merchant.update({
-      where: {
-        ktp: merchant.ktp,
-      },
-      data: merchant,
-    });
-
-    return this.toMerchantResponse(result);
-  }
-
-  async logout(merchant: Merchant): Promise<MerchantResponse> {
-    const result = await this.prismaService.merchant.update({
-      where: {
-        email: merchant.email,
-      },
+      where: { user_id: user.id },
       data: {
-        token: null,
+        status: updateStatusRequest.status,
       },
     });
 
