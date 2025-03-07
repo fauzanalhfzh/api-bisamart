@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   Param,
@@ -14,12 +13,10 @@ import { CourierService } from './courier.service';
 import { WebResponse } from '../model/web.model';
 import {
   CourierResponse,
-  LoginCourierRequest,
   RegisterCourierRequest,
   UpdateStatusRequest,
 } from '../model/courier.model';
 import {
-  ApiBody,
   ApiConsumes,
   ApiOperation,
   ApiSecurity,
@@ -29,7 +26,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { Auth } from '../common/auth.decorator';
-import { Courier } from '@prisma/client';
+import { Courier, User } from '@prisma/client';
 
 @ApiTags('Courier')
 @Controller('/api/v1/courier')
@@ -39,24 +36,26 @@ export class CourierController {
   @Post('/auth/register')
   @HttpCode(200)
   @ApiOperation({ summary: 'Register new driver' })
+  @ApiSecurity('Authorization')
+  @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileFieldsInterceptor(
       [
-        { name: 'ktp_url', maxCount: 1 },
-        { name: 'selfie_with_sim_url', maxCount: 1 },
-        { name: 'profile_url', maxCount: 1 },
-        { name: 'license_url', maxCount: 1 },
+        { name: 'ktp_photo', maxCount: 1 },
+        { name: 'selfie_with_sim_photo', maxCount: 1 },
+        { name: 'profile_photo', maxCount: 1 },
+        { name: 'license_photo', maxCount: 1 },
       ],
       {
         storage: diskStorage({
           destination: (req, file, cb) => {
-            if (file.fieldname === 'ktp_url') {
+            if (file.fieldname === 'ktp_photo') {
               cb(null, './storage/courier/ktp');
-            } else if (file.fieldname === 'selfie_with_sim_url') {
+            } else if (file.fieldname === 'selfie_with_sim_photo') {
               cb(null, './storage/courier/sim');
-            } else if (file.fieldname === 'profile_url') {
+            } else if (file.fieldname === 'profile_photo') {
               cb(null, './storage/courier/profile');
-            } else if (file.fieldname === 'license_url') {
+            } else if (file.fieldname === 'license_photo') {
               cb(null, './storage/courier/license');
             }
           },
@@ -65,16 +64,16 @@ export class CourierController {
             let prefix = '';
 
             switch (file.fieldname) {
-              case 'ktp_url':
+              case 'ktp_photo':
                 prefix = 'KTP';
                 break;
-              case 'selfie_with_sim_url':
+              case 'selfie_with_sim_photo':
                 prefix = 'SIM';
                 break;
-              case 'profile_url':
-                prefix = 'PRFL';
+              case 'profile_photo':
+                prefix = 'PP';
                 break;
-              case 'license_url':
+              case 'license_photo':
                 prefix = 'LNC';
                 break;
             }
@@ -86,65 +85,30 @@ export class CourierController {
       },
     ),
   )
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    description: 'Courier registration',
-    type: RegisterCourierRequest,
-    schema: {
-      type: 'object',
-      properties: {
-        name: { type: 'string' },
-        email: { type: 'string' },
-        phone_number: { type: 'string' },
-        password: { type: 'string' },
-        address_ktp: { type: 'string' },
-        ktp: { type: 'string' },
-        ktp_url: { type: 'string', format: 'binary' },
-        selfie_with_sim_url: { type: 'string', format: 'binary' },
-        profile_url: { type: 'string', format: 'binary' },
-        vehicle_brand: { type: 'string' },
-        vehicle_color: { type: 'string' },
-        vehicle_speed: { type: 'integer' },
-        registration_number: { type: 'string' },
-        license_plate: { type: 'string' },
-        license_url: { type: 'string', format: 'binary' },
-      },
-    },
-  })
   async register(
+    @Auth() user: User,
     @Body() request: RegisterCourierRequest,
     @UploadedFiles()
     files: {
-      ktp_url?: Express.Multer.File[];
-      selfie_with_sim_url?: Express.Multer.File[];
-      profile_url?: Express.Multer.File[];
-      license_url?: Express.Multer.File[];
+      ktp_photo?: Express.Multer.File[];
+      selfie_with_sim_photo?: Express.Multer.File[];
+      profile_photo?: Express.Multer.File[];
+      license_photo?: Express.Multer.File[];
     },
   ): Promise<WebResponse<CourierResponse>> {
-    const result = await this.courierService.register(request, files);
+    const result = await this.courierService.register(user, request, files);
     return {
       data: result,
     };
   }
 
-  @Post('/auth/login')
-  @HttpCode(200)
-  @ApiOperation({ summary: 'Login Courier' })
-  async login(
-    @Body() request: LoginCourierRequest,
-  ): Promise<WebResponse<CourierResponse>> {
-    const result = await this.courierService.login(request);
-    return {
-      data: result,
-    };
-  }
 
   @Get('/current')
   @HttpCode(200)
   @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'Get Courier Data' })
-  async get(@Auth() courier: Courier): Promise<WebResponse<CourierResponse>> {
-    const result = await this.courierService.get(courier);
+  async get(@Auth() user: User): Promise<WebResponse<CourierResponse>> {
+    const result = await this.courierService.get(user);
     return {
       data: result,
     };
@@ -169,23 +133,14 @@ export class CourierController {
   @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'Update Courier Status' })
   async updateStatus(
-    @Auth() courier: Courier,
+    
+    @Auth() user: User,
     @Body() request: UpdateStatusRequest,
   ): Promise<WebResponse<CourierResponse>> {
-    const result = await this.courierService.updateStatus(courier, request);
+    const result = await this.courierService.updateStatus(user, request);
     return {
       data: result,
     };
   }
 
-  @Delete('/auth/logout')
-  @HttpCode(200)
-  @ApiSecurity('Authorization')
-  @ApiOperation({ summary: 'Logout Courier' })
-  async logout(@Auth() courier: Courier): Promise<WebResponse<boolean>> {
-    await this.courierService.logout(courier);
-    return {
-      data: true,
-    };
-  }
 }
