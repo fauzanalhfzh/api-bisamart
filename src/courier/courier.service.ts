@@ -60,6 +60,10 @@ export class CourierService {
   ): Promise<CourierResponse> {
     this.logger.debug(`DriverService.register(${JSON.stringify(request)})`);
 
+    if (!user.is_verified) {
+      throw new HttpException('Email harus diverifikasi sebelum mendaftar sebagai Courier', 400);
+    }
+
     if (request.vehicle_speed !== undefined && request.vehicle_speed !== null) {
       if (typeof request.vehicle_speed !== 'number') {
         request.vehicle_speed = parseFloat(
@@ -74,6 +78,14 @@ export class CourierService {
     const registerRequest: RegisterCourierRequest =
       this.validationService.validate(CourierValidation.REGISTER, request);
 
+      const existingMerchant = await this.prismaService.merchant.findUnique({
+        where: { user_id: user.id },
+      });
+  
+      if (existingMerchant) {
+        throw new HttpException('User sudah terdaftar sebagai Courier', 400);
+      }
+      
     if (files.ktp_photo?.[0]) {
       registerRequest.ktp_photo = `/storage/courier/ktp/${files.ktp_photo[0].filename}`;
     }
