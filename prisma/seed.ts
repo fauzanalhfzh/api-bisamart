@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-async function main() {
+async function seedCategories() {
   const categories = [
     { name: 'Makanan & Minuman' },
     { name: 'Sembako & Kebutuhan Harian' },
@@ -16,7 +16,7 @@ async function main() {
   ];
 
   for (const category of categories) {
-    await prisma.category.upsert({
+    await prisma.producCategory.upsert({
       where: { name: category.name },
       update: {},
       create: {
@@ -24,8 +24,34 @@ async function main() {
       },
     });
   }
+  console.log('✅ Category seeding completed.');
+}
 
-  console.log('Categories seeding completed.');
+async function seedMerchantCategories() {
+  const merchantCategories = [
+    { name: 'Groceries & Retail' },
+    { name: 'F&B (Food & Beverages)' },
+    { name: 'Kesehatan & Kecantikan' },
+    { name: 'Rumah & Gaya Hidup' },
+    { name: 'Elektronik & Aksesoris' },
+    { name: 'Fashion & Aksesoris' },
+  ];
+
+  for (const category of merchantCategories) {
+    await prisma.merchantCategory.upsert({
+      where: { name: category.name },
+      update: {},
+      create: {
+        name: category.name,
+      },
+    });
+  }
+  console.log('✅ Merchant Category seeding completed.');
+}
+
+async function main() {
+  await seedCategories();
+  await seedMerchantCategories();
 }
 
 main()
