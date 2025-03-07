@@ -192,7 +192,7 @@ model MerchantCategory {
 model Address {
   id Int @id @default(autoincrement())
 
-  user_id Int @unique
+  user_id Int 
 
   address_line String
   city         String

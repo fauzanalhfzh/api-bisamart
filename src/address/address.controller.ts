@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   HttpCode,
+  Param,
+  ParseIntPipe,
   Post,
   UseInterceptors,
 } from '@nestjs/common';
@@ -27,8 +30,6 @@ export class AddressController {
   @HttpCode(200)
   @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'Create address for users' })
-  @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file'))
   async create(
     @Auth() user: User,
     @Body() request: CreateAddressRequest,
@@ -36,6 +37,20 @@ export class AddressController {
     const result = await this.addressService.create(user, request);
     return {
       data: result,
+    };
+  }
+
+  @Delete('/delete/:id')
+  @HttpCode(200)
+  @ApiSecurity('Authorization')
+  @ApiOperation({ summary: 'Delete address from users' })
+  async delete(
+    @Auth() user: User,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<WebResponse<boolean>> {
+    await this.addressService.delete(user, id);
+    return {
+      data: true,
     };
   }
 }
