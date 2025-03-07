@@ -43,7 +43,7 @@ model User {
 
   token String?
 
-  OTP UserOTP[] @relation("user_otp")
+  OTP           UserOTP[]            @relation("user_otp")
   ResetPassword PasswordResetToken[] @relation("reset_password")
 
   Customer  Customer? @relation("user_customer")
@@ -69,13 +69,13 @@ model UserOTP {
 }
 
 model PasswordResetToken {
-  id        String   @id @default(uuid())
-  user_id    Int      @unique
-  
+  id      String @id @default(uuid())
+  user_id Int    @unique
+
   token     String
   expiresAt DateTime
-  
-  user      User     @relation("reset_password", fields: [user_id], references: [id], onDelete: Cascade)
+
+  user User @relation("reset_password", fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("password_reset_token")
 }
@@ -106,12 +106,12 @@ model Merchant {
   user_id              Int @unique
   merchant_category_id Int @unique
 
-  ktp              String @unique
-  ktp_photo        String
-  place_of_birth   String
-  date_of_birth    String
-  address_ktp      String
-  self_photo_photo String
+  ktp            String @unique
+  ktp_photo      String
+  place_of_birth String
+  date_of_birth  String
+  address_ktp    String
+  self_photo     String
 
   bank_name         String
   account_number    String
@@ -192,7 +192,7 @@ model MerchantCategory {
 model Address {
   id Int @id @default(autoincrement())
 
-  user_id Int 
+  user_id Int
 
   address_line String
   city         String
