@@ -100,6 +100,12 @@ export class CourierService {
       registerRequest.license_photo = `/storage/courier/license/${files.license_photo[0].filename}`;
     }
 
+    await this.prismaService.user.update({
+      where: { id: user.id},
+      data: { roles: "COURIER"}
+    })
+
+
     const courier = await this.prismaService.courier.create({
       data: {
         user_id: user.id,
