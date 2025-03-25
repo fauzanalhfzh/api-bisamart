@@ -16,6 +16,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  MerchantOperatingHoursRequest,
+  MerchantOperatingHoursResponse,
   MerchantResponse,
   RegisterMerchantRequest,
   UpdateStatusRequest,
@@ -107,20 +109,6 @@ export class MerchantController {
     };
   }
 
-  // @Patch('/current')
-  // @HttpCode(200)
-  // @ApiSecurity('Authorization')
-  // @ApiOperation({ summary: 'Update data merchant' })
-  // async update(
-  //   @Auth() merchant: Merchant,
-  //   @Body() request: UpdateMerchantRequest,
-  // ): Promise<WebResponse<MerchantResponse>> {
-  //   const result = await this.merchantService.update(merchant, request);
-  //   return {
-  //     data: result,
-  //   };
-  // }
-
   @Patch('/current/update-status')
   @HttpCode(200)
   @ApiSecurity('Authorization')
@@ -137,4 +125,17 @@ export class MerchantController {
     };
   }
 
+  @Patch('/current')
+  @HttpCode(200)
+  @ApiSecurity('Authorization')
+  @ApiOperation({ summary: 'Create Merchant Operating Hours' })
+  async update(
+    @Auth() user: User,
+    @Body() request: MerchantOperatingHoursRequest,
+  ): Promise<WebResponse<MerchantOperatingHoursResponse>> {
+    const result = await this.merchantService.createOperatingHours(user, request);
+    return {
+      data: result,
+    };
+  }
 }

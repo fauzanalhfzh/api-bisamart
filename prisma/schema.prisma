@@ -13,6 +13,12 @@ enum Roles {
   COURIER
 }
 
+enum DeliveryMethod {
+  PICKUP
+  DELIVERY
+  BOTH
+}
+
 enum OrderStatus {
   PENDING
   ACCEPTED
@@ -29,6 +35,16 @@ enum MerchantStatus {
   BUKA
   TUTUP
   TAHAN
+}
+
+enum DayOfWeek {
+  SENIN
+  SELASA
+  RABU
+  KAMIS
+  JUMAT
+  SABTU
+  MINGGU
 }
 
 model User {
@@ -217,10 +233,10 @@ model MerchantOperatingHours {
 
   merchant_id Int
 
-  day_of_week String
+  day_of_week DayOfWeek
   is_24_hours Boolean @default(false)
-  open_time   String
-  close_time  String
+  open_time   String?
+  close_time  String? 
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -256,6 +272,7 @@ model Product {
   price Float
   stock Int
   netto Int
+  delivery_method DeliveryMethod @default(DELIVERY)
 
   discount Int?
 
