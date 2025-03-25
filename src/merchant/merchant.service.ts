@@ -10,6 +10,8 @@ import { ValidationService } from '../common/validation.service';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import {
+  MerchantOperatingHoursRequest,
+  MerchantOperatingHoursResponse,
   MerchantResponse,
   RegisterMerchantRequest,
   UpdateStatusRequest,
@@ -54,27 +56,6 @@ export class MerchantService {
     return merchantResponse;
   }
 
-  // toProductResponse(product: Product): ProductResponse {
-  //   if (!product) {
-  //     throw new Error('Product is undefined or null');
-  //   }
-
-  //   return {
-  //     id: product.id,
-  //     image_url: product.image_url,
-  //     name: product.name,
-  //     description: product.description,
-  //     price: product.price,
-  //     stock: product.stock,
-  //     netto: product.netto,
-  //     discount: product.discount,
-  //     merchant_id: product.merchant_id,
-  //     category_id: product.category_id,
-  //     created_at: product.created_at,
-  //     updated_at: product.updated_at,
-  //   };
-  // }
-
   async checkMerchantMustExists(id: number): Promise<Merchant> {
     const merchant = await this.prismaService.merchant.findFirst({
       where: {
@@ -87,20 +68,6 @@ export class MerchantService {
     }
 
     return merchant;
-  }
-
-  async checkProductMustExists(id: number): Promise<Product> {
-    const product = await this.prismaService.product.findFirst({
-      where: {
-        id: id,
-      },
-    });
-
-    if (!product) {
-      throw new HttpException('Product is not found', 404);
-    }
-
-    return product;
   }
 
   async register(
@@ -179,9 +146,9 @@ export class MerchantService {
     }
 
     await this.prismaService.user.update({
-      where: { id: user.id},
-      data: { roles: "MERCHANT"}
-    })
+      where: { id: user.id },
+      data: { roles: 'MERCHANT' },
+    });
 
     const merchant = await this.prismaService.merchant.create({
       data: {
@@ -220,8 +187,6 @@ export class MerchantService {
     return this.toMerchantResponse(merchant);
   }
 
-  //! create service for adding operating hours
-  
   async updateStatus(
     user: User,
     request: UpdateStatusRequest,
@@ -241,5 +206,42 @@ export class MerchantService {
     });
 
     return this.toMerchantResponse(result);
+  }
+
+  async createOperatingHours(
+    user: User,
+    request: MerchantOperatingHoursRequest,
+  ): Promise<MerchantOperatingHoursResponse> {
+    this.logger.info(
+      `MerchantService.Get( ${JSON.stringify(user)}, ${JSON.stringify(request)})`,
+    );
+
+    if (typeof request.merchant_id !== 'number') {
+      request.merchant_id = parseFloat(
+        request.merchant_id as unknown as string,
+      );
+      if (isNaN(request.merchant_id)) {
+        throw new HttpException('Merchant ID harus berupa number.', 400);
+      }
+    }
+
+    const createOperatingHourRequest: MerchantOperatingHoursRequest =
+      this.validationService.validate(
+        MerchantValidation.CREATEOPERATINGHOURS,
+        request,
+      );
+
+    const merchant = await this.prismaService.merchant.findUnique({
+      where: {user_id: user.id}
+    })
+      
+    const result = await this.prismaService.merchantOperatingHours.create({
+      data: {
+        merchant_id: merchant.id,
+        ...createOperatingHourRequest,
+      },
+    });
+
+    return result;
   }
 }

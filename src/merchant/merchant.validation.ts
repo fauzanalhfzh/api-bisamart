@@ -1,4 +1,4 @@
-import { MerchantStatus } from '@prisma/client';
+import { DayOfWeek, MerchantStatus } from '@prisma/client';
 import { z, ZodType } from 'zod';
 
 export class MerchantValidation {
@@ -19,12 +19,22 @@ export class MerchantValidation {
     password: z.string().min(1).max(100),
   });
 
-  static readonly UPDATE_MERCHANT: ZodType = z.object({
-    address: z.string().min(1).max(150).optional(),
-    open_time: z.string().min(1).max(10).optional(),
-    close_time: z.string().min(1).max(10).optional(),
-    password: z.string().min(1).max(100).optional(),
+  static readonly CREATEOPERATINGHOURS: ZodType = z.object({
+    merchant_id: z.number(),
+    DayOfWeek: z.enum([
+      DayOfWeek.SENIN,
+      DayOfWeek.SELASA,
+      DayOfWeek.RABU,
+      DayOfWeek.KAMIS,
+      DayOfWeek.JUMAT,
+      DayOfWeek.SABTU,
+      DayOfWeek.MINGGU,
+    ]),
+    is_24_hours: z.boolean(),
+    open_time: z.string().min(1).max(7).optional(),
+    close_time: z.string().min(1).max(7).optional(),
   });
+
   static readonly UPDATESTATUS: ZodType = z.object({
     status: z.enum([
       MerchantStatus.BUKA,

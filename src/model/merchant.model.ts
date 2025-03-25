@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { MerchantStatus } from '@prisma/client';
+import { DayOfWeek, MerchantStatus } from '@prisma/client';
 
 export class RegisterMerchantRequest {
   @ApiProperty({ example: 1 })
@@ -35,6 +35,19 @@ export class LoginMerchantRequest {
   password: string;
 }
 
+export class MerchantOperatingHoursRequest {
+  @ApiProperty({ example: 1 })
+  merchant_id: number;
+  @ApiProperty({ example: DayOfWeek.SENIN })
+  day_of_week: DayOfWeek;
+  @ApiProperty({ example: true })
+  is_24_hours: boolean;
+  @ApiProperty({ example: "08.00" })
+  open_time?: string;
+  @ApiProperty({ example: "22.00" })
+  close_time?: string;
+}
+
 export class UpdateStatusRequest {
   @ApiProperty({
     enum: MerchantStatus, 
@@ -44,14 +57,6 @@ export class UpdateStatusRequest {
 }
 
 export class UpdateMerchantRequest {}
-
-export class OperatingHoursRequest {
-  merchant_id: string;
-  day_of_week: string;
-  is_24_hours: boolean;
-  open_time: string;
-  close_time: string;
-}
 
 export class MerchantResponse {
   id: number;
@@ -80,6 +85,17 @@ export class MerchantResponse {
   pending_order: number;
   cancel_order: number;
 
+  created_at: Date;
+  updated_at: Date;
+}
+
+export class MerchantOperatingHoursResponse {
+  id: number;
+  merchant_id: number;
+  day_of_week: DayOfWeek;
+  is_24_hours: boolean;
+  open_time: string;
+  close_time: string;
   created_at: Date;
   updated_at: Date;
 }
