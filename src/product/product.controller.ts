@@ -5,8 +5,10 @@ import {
   Get,
   HttpCode,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
+  Query,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
@@ -69,11 +71,7 @@ export class ProductController {
     @Body() request: CreateProductRequest,
     @UploadedFiles() file: { image: Express.Multer.File[] },
   ): Promise<WebResponse<ProductResponse>> {
-    const result = await this.productService.createProduct(
-      user,
-      request,
-      file,
-    );
+    const result = await this.productService.createProduct(user, request, file);
     return {
       data: result,
     };
@@ -112,7 +110,7 @@ export class ProductController {
   async updateProduct(
     @Auth() merchant: Merchant,
     @Body() request: UpdateProductRequest,
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @UploadedFiles() files: { image: Express.Multer.File[] },
   ): Promise<WebResponse<ProductResponse>> {
     const product = await this.productService.checkProductMustExists(id);
@@ -130,9 +128,21 @@ export class ProductController {
 
   @Get('/product')
   @HttpCode(200)
-  @ApiOperation({ summary: 'Get all product' })
-  async getAllProduct(): Promise<WebResponse<ProductResponse[]>> {
-    const result = await this.productService.getAllProduct();
+  @ApiOperation({
+    summary:
+      'Get all product, use page and take for fastest render data. example : /product?page=1&take10',
+  })
+  async getAllProduct(
+    @Query('page') page = '1',
+    @Query('take') take = '10',
+  ): Promise<WebResponse<ProductResponse[]>> {
+    const pageNumber = Number(page);
+    const takeNumber = Number(take);
+
+    const result = await this.productService.getAllProduct(
+      pageNumber,
+      takeNumber,
+    );
     return {
       data: result,
     };
@@ -140,9 +150,20 @@ export class ProductController {
 
   @Get('/product/method-pickup')
   @HttpCode(200)
-  @ApiOperation({ summary: 'Get product by pickup Method' })
-  async getProductByPickupMethod(): Promise<WebResponse<ProductResponse[]>> {
-    const result = await this.productService.getProductByPickupMethod();
+  @ApiOperation({
+    summary:
+      'Get product by pickup Method, use page and take for fastest render data. example : /product?page=1&take10',
+  })
+  async getProductByPickupMethod(
+    @Query('page') page = '1',
+    @Query('take') take = '10',
+  ): Promise<WebResponse<ProductResponse[]>> {
+    const pageNumber = Number(page);
+    const takeNumber = Number(take);
+    const result = await this.productService.getProductByPickupMethod(
+      pageNumber,
+      takeNumber,
+    );
     return {
       data: result,
     };
@@ -150,9 +171,20 @@ export class ProductController {
 
   @Get('/product/method-delivery')
   @HttpCode(200)
-  @ApiOperation({ summary: 'Get product by Delivery Method' })
-  async getProductByDeliveryMethod(): Promise<WebResponse<ProductResponse[]>> {
-    const result = await this.productService.getProductByDeliveryMethod();
+  @ApiOperation({
+    summary:
+      'Get product by Delivery Method, use page and take for fastest render data. example : /product?page=1&take10',
+  })
+  async getProductByDeliveryMethod(
+    @Query('page') page = '1',
+    @Query('take') take = '10',
+  ): Promise<WebResponse<ProductResponse[]>> {
+    const pageNumber = Number(page);
+    const takeNumber = Number(take);
+    const result = await this.productService.getProductByDeliveryMethod(
+      pageNumber,
+      takeNumber,
+    );
     return {
       data: result,
     };
@@ -160,9 +192,20 @@ export class ProductController {
 
   @Get('/product/method-both')
   @HttpCode(200)
-  @ApiOperation({ summary: 'Get product by both Method' })
-  async getProductByBothMethod(): Promise<WebResponse<ProductResponse[]>> {
-    const result = await this.productService.getProductByBothMethod();
+  @ApiOperation({
+    summary:
+      'Get product by both Method, use page and take for fastest render data. example : /product?page=1&take10',
+  })
+  async getProductByBothMethod(
+    @Query('page') page = '1',
+    @Query('take') take = '10',
+  ): Promise<WebResponse<ProductResponse[]>> {
+    const pageNumber = Number(page);
+    const takeNumber = Number(take);
+    const result = await this.productService.getProductByBothMethod(
+      pageNumber,
+      takeNumber,
+    );
     return {
       data: result,
     };
@@ -172,19 +215,19 @@ export class ProductController {
   @HttpCode(200)
   @ApiOperation({ summary: 'Get product by id' })
   async getProductById(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
   ): Promise<WebResponse<ProductResponse>> {
     const result = await this.productService.getProductById(id);
     return {
       data: result,
     };
   }
-  
+
   @Get('merchant/:id/product')
   @HttpCode(200)
   @ApiOperation({ summary: 'Get all product by merchant ID' })
   async getProductByMerchantId(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
   ): Promise<WebResponse<ProductResponse[]>> {
     const result = await this.productService.getProductByMerchantId(id);
     return {
@@ -196,7 +239,7 @@ export class ProductController {
   @HttpCode(200)
   @ApiOperation({ summary: 'Get all product by category' })
   async getProductByCategory(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
   ): Promise<WebResponse<ProductResponse[]>> {
     const result = await this.productService.getProductByCategory(id);
     return {
@@ -209,7 +252,7 @@ export class ProductController {
   @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'Delete product by id' })
   async deleteProductById(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
   ): Promise<WebResponse<boolean>> {
     await this.productService.deleteProductById(id);
     return {

@@ -1,4 +1,9 @@
-import { BadRequestException, HttpException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { DeliveryMethod, Merchant, Product, Roles, User } from '@prisma/client';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from '../common/prisma.service';
@@ -60,7 +65,7 @@ export class ProductService {
   async checkProductMustExists(id: number): Promise<Product> {
     const product = await this.prismaService.product.findFirst({
       where: {
-        id: Number(id),
+        id: id,
       },
     });
 
@@ -83,18 +88,25 @@ export class ProductService {
     );
 
     if (user.roles !== Roles.MERCHANT) {
-      throw new HttpException('Forbidden: Only merchants can create products.', 401);
+      throw new HttpException(
+        'Forbidden: Only merchants can create products.',
+        401,
+      );
     }
 
     if (typeof request.merchant_id !== 'number') {
-      request.merchant_id = parseFloat(request.merchant_id as unknown as string);
+      request.merchant_id = parseFloat(
+        request.merchant_id as unknown as string,
+      );
       if (isNaN(request.merchant_id)) {
         throw new HttpException('Merchant ID harus berupa number.', 400);
       }
     }
 
     if (typeof request.category_id !== 'number') {
-      request.category_id = parseFloat(request.category_id as unknown as string);
+      request.category_id = parseFloat(
+        request.category_id as unknown as string,
+      );
       if (isNaN(request.category_id)) {
         throw new HttpException('Category ID harus berupa number.', 400);
       }
@@ -151,10 +163,16 @@ export class ProductService {
     return this.toProductResponse(product);
   }
 
-  async getAllProduct(): Promise<ProductResponse[]> {
+  async getAllProduct(page: number, take: number): Promise<ProductResponse[]> {
     this.logger.debug(`MartService.getAllProduct()`);
 
-    const products = await this.prismaService.product.findMany();
+    const skip = (page - 1) * take; // Hitung offset berdasarkan halaman
+
+    const products = await this.prismaService.product.findMany({
+      skip: skip,
+      take: take,
+      orderBy: { created_at: 'desc' }, // Urutkan dari produk terbaru
+    });
 
     return products.map((product) => this.toProductResponse(product));
   }
@@ -189,42 +207,56 @@ export class ProductService {
 
   // ! create getProductByMethodDelivery
   // ? adding take & pagination for indexing products
-  async getProductByPickupMethod(): Promise<ProductResponse[]> {
+  async getProductByPickupMethod(page: number, take: number): Promise<ProductResponse[]> {
     this.logger.debug(`Fetching products with pickup method`);
+
+    const skip = (page - 1) * take;
 
     const products = await this.prismaService.product.findMany({
       where: {
-        delivery_method: DeliveryMethod.PICKUP
+        delivery_method: DeliveryMethod.PICKUP,
       },
+      skip: skip,
+      take: take,
+      orderBy: { created_at: 'desc' }
     });
 
     return products.map((product) => this.toProductResponse(product));
   }
-  
-  async getProductByDeliveryMethod(): Promise<ProductResponse[]> {
+
+  async getProductByDeliveryMethod(page: number, take: number): Promise<ProductResponse[]> {
     this.logger.debug(`Fetching products with pickup method`);
+
+    const skip = (page - 1) * take;
 
     const products = await this.prismaService.product.findMany({
       where: {
-        delivery_method: DeliveryMethod.DELIVERY
+        delivery_method: DeliveryMethod.DELIVERY,
       },
+      skip: skip,
+      take: take,
+      orderBy: { created_at: 'desc' }
     });
 
     return products.map((product) => this.toProductResponse(product));
   }
-  
-  async getProductByBothMethod(): Promise<ProductResponse[]> {
+
+  async getProductByBothMethod(page: number, take: number): Promise<ProductResponse[]> {
     this.logger.debug(`Fetching products with pickup method`);
+
+    const skip = (page - 1) * take;
 
     const products = await this.prismaService.product.findMany({
       where: {
-        delivery_method: DeliveryMethod.BOTH
+        delivery_method: DeliveryMethod.BOTH,
       },
+      skip: skip,
+      take: take,
+      orderBy: { created_at: 'desc' }
     });
 
     return products.map((product) => this.toProductResponse(product));
   }
-  
 
   async getProductByCategory(id: number): Promise<ProductResponse[]> {
     this.logger.debug(
