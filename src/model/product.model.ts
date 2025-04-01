@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { DeliveryMethod } from '@prisma/client';
 
 export class CreateProductRequest {
   @ApiProperty({ type: 'string', format: 'binary' })
@@ -15,6 +16,8 @@ export class CreateProductRequest {
   netto: number;
   @ApiProperty({ example: 10 })
   discount: number;
+  @ApiProperty({ example: DeliveryMethod.BOTH })
+  delivery_method: DeliveryMethod;
   @ApiProperty({ example: 1 })
   merchant_id: number;
   @ApiProperty({ example: 1 })
@@ -53,6 +56,7 @@ export class ProductResponse {
   stock: number;
   netto: number;
   discount: number;
+  delivery_method: DeliveryMethod;
   
   created_at: Date;
   updated_at: Date;

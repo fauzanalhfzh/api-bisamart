@@ -21,7 +21,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { Auth } from '../common/auth.decorator';
-import { Merchant, User } from '@prisma/client';
+import { DeliveryMethod, Merchant, User } from '@prisma/client';
 import {
   CreateProductRequest,
   ProductResponse,
@@ -138,6 +138,36 @@ export class ProductController {
     };
   }
 
+  @Get('/product/method-pickup')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Get product by pickup Method' })
+  async getProductByPickupMethod(): Promise<WebResponse<ProductResponse[]>> {
+    const result = await this.productService.getProductByPickupMethod();
+    return {
+      data: result,
+    };
+  }
+
+  @Get('/product/method-delivery')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Get product by Delivery Method' })
+  async getProductByDeliveryMethod(): Promise<WebResponse<ProductResponse[]>> {
+    const result = await this.productService.getProductByDeliveryMethod();
+    return {
+      data: result,
+    };
+  }
+
+  @Get('/product/method-both')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Get product by both Method' })
+  async getProductByBothMethod(): Promise<WebResponse<ProductResponse[]>> {
+    const result = await this.productService.getProductByBothMethod();
+    return {
+      data: result,
+    };
+  }
+
   @Get('/product/:id')
   @HttpCode(200)
   @ApiOperation({ summary: 'Get product by id' })
@@ -149,7 +179,7 @@ export class ProductController {
       data: result,
     };
   }
-
+  
   @Get('merchant/:id/product')
   @HttpCode(200)
   @ApiOperation({ summary: 'Get all product by merchant ID' })

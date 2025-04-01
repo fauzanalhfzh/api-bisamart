@@ -1,5 +1,5 @@
-import { HttpException, Inject, Injectable } from '@nestjs/common';
-import { Merchant, Product, Roles, User } from '@prisma/client';
+import { BadRequestException, HttpException, Inject, Injectable } from '@nestjs/common';
+import { DeliveryMethod, Merchant, Product, Roles, User } from '@prisma/client';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from '../common/prisma.service';
 import { ValidationService } from '../common/validation.service';
@@ -35,6 +35,7 @@ export class ProductService {
       stock: product.stock,
       netto: product.netto,
       discount: product.discount,
+      delivery_method: product.delivery_method,
       merchant_id: product.merchant_id,
       category_id: product.category_id,
       created_at: product.created_at,
@@ -59,7 +60,7 @@ export class ProductService {
   async checkProductMustExists(id: number): Promise<Product> {
     const product = await this.prismaService.product.findFirst({
       where: {
-        id: id,
+        id: Number(id),
       },
     });
 
@@ -155,7 +156,6 @@ export class ProductService {
 
     const products = await this.prismaService.product.findMany();
 
-    // convert to array
     return products.map((product) => this.toProductResponse(product));
   }
 
@@ -187,6 +187,45 @@ export class ProductService {
     return this.toProductResponse(result);
   }
 
+  // ! create getProductByMethodDelivery
+  // ? adding take & pagination for indexing products
+  async getProductByPickupMethod(): Promise<ProductResponse[]> {
+    this.logger.debug(`Fetching products with pickup method`);
+
+    const products = await this.prismaService.product.findMany({
+      where: {
+        delivery_method: DeliveryMethod.PICKUP
+      },
+    });
+
+    return products.map((product) => this.toProductResponse(product));
+  }
+  
+  async getProductByDeliveryMethod(): Promise<ProductResponse[]> {
+    this.logger.debug(`Fetching products with pickup method`);
+
+    const products = await this.prismaService.product.findMany({
+      where: {
+        delivery_method: DeliveryMethod.DELIVERY
+      },
+    });
+
+    return products.map((product) => this.toProductResponse(product));
+  }
+  
+  async getProductByBothMethod(): Promise<ProductResponse[]> {
+    this.logger.debug(`Fetching products with pickup method`);
+
+    const products = await this.prismaService.product.findMany({
+      where: {
+        delivery_method: DeliveryMethod.BOTH
+      },
+    });
+
+    return products.map((product) => this.toProductResponse(product));
+  }
+  
+
   async getProductByCategory(id: number): Promise<ProductResponse[]> {
     this.logger.debug(
       `MartService.getProductsByCategory(${JSON.stringify(id)})`,
@@ -201,20 +240,7 @@ export class ProductService {
       },
     });
 
-    return products.map((product) => ({
-      id: product.id,
-      image: product.image,
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      stock: product.stock,
-      netto: product.netto,
-      discount: product.discount,
-      merchant_id: product.merchant_id,
-      category_id: product.category_id,
-      created_at: product.created_at,
-      updated_at: product.updated_at,
-    }));
+    return products.map((product) => this.toProductResponse(product));
   }
 
   async editProduct(
