@@ -9,7 +9,7 @@ export class SimpleController {
 
   @Get()
   @HttpCode(200)
-  @ApiOperation({ summary: 'Test connect API' })
+  @ApiOperation({ summary: 'Test connection API' })
   getHello(): string {
     const result = this.simpleService.textHello();
     return result;

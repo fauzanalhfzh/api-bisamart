@@ -4,7 +4,7 @@ import {
   Inject,
   Injectable,
 } from '@nestjs/common';
-import { DeliveryMethod, Merchant, Product, Roles, User } from '@prisma/client';
+import { DeliveryMethod, Merchant, Prisma, Product, Roles, User } from '@prisma/client';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from '../common/prisma.service';
 import { ValidationService } from '../common/validation.service';
@@ -163,15 +163,29 @@ export class ProductService {
     return this.toProductResponse(product);
   }
 
-  async getAllProduct(page: number, take: number): Promise<ProductResponse[]> {
+  async getAllProduct(
+    page: number,
+    take: number,
+    search?: string,
+  ): Promise<ProductResponse[]> {
     this.logger.debug(`MartService.getAllProduct()`);
 
     const skip = (page - 1) * take; // Hitung offset berdasarkan halaman
 
+    const whereCondition: Prisma.ProductWhereInput = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { description: { contains: search, mode: 'insensitive' } },
+          ],
+        }
+      : {};
+
     const products = await this.prismaService.product.findMany({
+      where: whereCondition,
       skip: skip,
       take: take,
-      orderBy: { created_at: 'desc' }, // Urutkan dari produk terbaru
+      orderBy: { created_at: 'desc' },
     });
 
     return products.map((product) => this.toProductResponse(product));
@@ -205,9 +219,10 @@ export class ProductService {
     return this.toProductResponse(result);
   }
 
-  // ! create getProductByMethodDelivery
-  // ? adding take & pagination for indexing products
-  async getProductByPickupMethod(page: number, take: number): Promise<ProductResponse[]> {
+  async getProductByPickupMethod(
+    page: number,
+    take: number,
+  ): Promise<ProductResponse[]> {
     this.logger.debug(`Fetching products with pickup method`);
 
     const skip = (page - 1) * take;
@@ -218,13 +233,16 @@ export class ProductService {
       },
       skip: skip,
       take: take,
-      orderBy: { created_at: 'desc' }
+      orderBy: { created_at: 'desc' },
     });
 
     return products.map((product) => this.toProductResponse(product));
   }
 
-  async getProductByDeliveryMethod(page: number, take: number): Promise<ProductResponse[]> {
+  async getProductByDeliveryMethod(
+    page: number,
+    take: number,
+  ): Promise<ProductResponse[]> {
     this.logger.debug(`Fetching products with pickup method`);
 
     const skip = (page - 1) * take;
@@ -235,13 +253,16 @@ export class ProductService {
       },
       skip: skip,
       take: take,
-      orderBy: { created_at: 'desc' }
+      orderBy: { created_at: 'desc' },
     });
 
     return products.map((product) => this.toProductResponse(product));
   }
 
-  async getProductByBothMethod(page: number, take: number): Promise<ProductResponse[]> {
+  async getProductByBothMethod(
+    page: number,
+    take: number,
+  ): Promise<ProductResponse[]> {
     this.logger.debug(`Fetching products with pickup method`);
 
     const skip = (page - 1) * take;
@@ -252,7 +273,7 @@ export class ProductService {
       },
       skip: skip,
       take: take,
-      orderBy: { created_at: 'desc' }
+      orderBy: { created_at: 'desc' },
     });
 
     return products.map((product) => this.toProductResponse(product));

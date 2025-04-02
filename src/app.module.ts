@@ -7,17 +7,25 @@ import { AddressModule } from './address/address.module';
 import { CourierModule } from './courier/courier.module';
 import { MerchantModule } from './merchant/merchant.module';
 import { ProductModule } from './product/product.module';
+import { CouponModule } from './coupon/coupon.module';
 
 @Module({
   imports: [
     CommonModule,
     SimpleModule,
     UserModule,
+    AddressModule,
     CourierModule,
     MerchantModule,
     ProductModule,
-    AddressModule,
     CategoryModule,
+    // ? coupon module
+    CouponModule
+    // ! cart module
+    // ! order module
+    // ! payment module
+    // ! notification module
+    // ! messagging module
   ],
   controllers: [],
   providers: [],

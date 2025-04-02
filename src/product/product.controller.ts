@@ -135,6 +135,7 @@ export class ProductController {
   async getAllProduct(
     @Query('page') page = '1',
     @Query('take') take = '10',
+    @Query('search') search?: string,
   ): Promise<WebResponse<ProductResponse[]>> {
     const pageNumber = Number(page);
     const takeNumber = Number(take);
@@ -142,6 +143,7 @@ export class ProductController {
     const result = await this.productService.getAllProduct(
       pageNumber,
       takeNumber,
+      search
     );
     return {
       data: result,
