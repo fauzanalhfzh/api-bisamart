@@ -7,7 +7,7 @@ import { AddressModule } from './address/address.module';
 import { CourierModule } from './courier/courier.module';
 import { MerchantModule } from './merchant/merchant.module';
 import { ProductModule } from './product/product.module';
-import { CouponModule } from './coupon/coupon.module';
+import { CouponModule } from './promo/promo.module';
 
 @Module({
   imports: [
