@@ -56,7 +56,7 @@ export class PromoService {
       `MartService.create-promo(${JSON.stringify(user)}, ${JSON.stringify(request)})`,
     );
 
-    if (user.roles !== Roles.GODMODE) {
+    if (user.roles !== Roles.MERCHANT) {
       throw new HttpException(
         'Forbidden: Only SUPER DUPER GOD ADMIN can create promo.',
         401,

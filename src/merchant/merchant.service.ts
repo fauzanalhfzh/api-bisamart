@@ -176,7 +176,7 @@ export class MerchantService {
     const merchant = await this.prismaService.merchant.findUnique({
       where: { user_id: user.id },
       include: {
-        User: true,
+        user: true,
       },
     });
 

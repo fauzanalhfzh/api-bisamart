@@ -133,7 +133,7 @@ export class CourierService {
     const courier = await this.prismaService.courier.findUnique({
       where: { user_id: user.id },
       include: {
-        User: true, 
+        user: true, 
       },
     });
   
