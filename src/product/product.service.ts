@@ -289,7 +289,7 @@ export class ProductService {
         category_id: id,
       },
       include: {
-        category: true,
+        Category: true,
       },
     });
 
