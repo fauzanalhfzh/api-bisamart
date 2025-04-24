@@ -86,7 +86,7 @@ model UserOTP {
 
 model PasswordResetToken {
   id      Int @id @default(autoincrement())
-  user_id Int    @unique
+  user_id Int @unique
 
   token     String
   expiresAt DateTime
@@ -108,7 +108,7 @@ model Customer {
   pending_order Int @default(0)
   cancel_order  Int @default(0)
 
-  user User @relation("user_customer", fields: [user_id], references: [id])
+  user User   @relation("user_customer", fields: [user_id], references: [id])
   cart Cart[] @relation("customer_cart")
 
   created_at DateTime @default(now())
@@ -123,7 +123,7 @@ model Merchant {
   user_id              Int @unique
   merchant_category_id Int @unique
 
-  ktp            String @unique
+  ktp            String   @unique
   ktp_photo      String
   place_of_birth String
   date_of_birth  DateTime
@@ -235,9 +235,9 @@ model MerchantOperatingHours {
   merchant_id Int
 
   day_of_week DayOfWeek
-  is_24_hours Boolean @default(false)
+  is_24_hours Boolean   @default(false)
   open_time   String?
-  close_time  String? 
+  close_time  String?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -251,7 +251,7 @@ model Promo {
   id Int @id @default(autoincrement())
 
   thumbnail       String
-  code            String @unique
+  code            String   @unique
   name            String?
   discount_amount Float
   expiration_date DateTime
@@ -270,9 +270,9 @@ model Product {
   name        String
   description String?
 
-  price Float
-  stock Int
-  netto Int
+  price           Float
+  stock           Int
+  netto           Int
   delivery_method DeliveryMethod @default(DELIVERY)
 
   discount Int?
@@ -283,8 +283,8 @@ model Product {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  cart Cart[] @relation("product_cart")
-  merchant Merchant @relation("merchant_product", fields: [merchant_id], references: [id])
+  cart     Cart[]         @relation("product_cart")
+  merchant Merchant       @relation("merchant_product", fields: [merchant_id], references: [id])
   category ProducCategory @relation("product_category", fields: [category_id], references: [id])
 
   @@map("products")
@@ -308,14 +308,14 @@ model Cart {
   id Int @id @default(autoincrement())
 
   quantity Int
-  note String?
+  note     String?
 
   customer_id Int
-  product_id Int
+  product_id  Int
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   customer Customer @relation("customer_cart", fields: [customer_id], references: [id])
-  product Product @relation("product_cart", fields: [product_id], references: [id])
+  product  Product  @relation("product_cart", fields: [product_id], references: [id])
 }
