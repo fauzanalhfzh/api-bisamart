@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { Cart } from '@prisma/client';
+import { Cart, User } from '@prisma/client';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from 'src/common/prisma.service';
 import { ValidationService } from 'src/common/validation.service';
@@ -29,7 +29,7 @@ export class CartService {
     return cartResponse;
   }
 
-  async addToCart(request: AddingToCartRequest): Promise<CartResponse> {
+  async addToCart(user: User, request: AddingToCartRequest): Promise<CartResponse> {
     const cartRequest: AddingToCartRequest = this.validationService.validate(
       CartValidation.ADDINGTOCART,
       request,
@@ -74,7 +74,7 @@ export class CartService {
     return this.toCartResponse(cart);
   }
 
-  async DeleteItemFromCart(request: DeleteItemFromCart): Promise<void> {
+  async DeleteItemFromCart(user: User, request: DeleteItemFromCart): Promise<void> {
     const cartRequest: DeleteItemFromCart = this.validationService.validate(
         CartValidation.DELETEITEM,
         request,
