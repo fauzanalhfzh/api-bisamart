@@ -62,10 +62,10 @@ model User {
   OTP           UserOTP[]            @relation("user_otp")
   ResetPassword PasswordResetToken[] @relation("reset_password")
 
-  Customer  Customer? @relation("user_customer")
-  Merchant  Merchant? @relation("user_merchant")
-  Courier   Courier?  @relation("user_courier")
-  Addresses Address[] @relation("user_address")
+  customer  Customer? @relation("user_customer")
+  merchant  Merchant? @relation("user_merchant")
+  courier   Courier?  @relation("user_courier")
+  addresses Address[] @relation("user_address")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -79,7 +79,7 @@ model UserOTP {
   otp       String
   expiresAt DateTime
 
-  User User @relation("user_otp", fields: [user_id], references: [id], onDelete: Cascade)
+  user User @relation("user_otp", fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("user_otp")
 }
@@ -108,7 +108,8 @@ model Customer {
   pending_order Int @default(0)
   cancel_order  Int @default(0)
 
-  User User @relation("user_customer", fields: [user_id], references: [id])
+  user User @relation("user_customer", fields: [user_id], references: [id])
+  cart Cart[] @relation("customer_cart")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -145,8 +146,8 @@ model Merchant {
   pending_order Int @default(0)
   cancel_order  Int @default(0)
 
-  User             User                     @relation("user_merchant", fields: [user_id], references: [id])
-  MerchantCategory MerchantCategory         @relation("merchant_category", fields: [merchant_category_id], references: [id])
+  user             User                     @relation("user_merchant", fields: [user_id], references: [id])
+  merchantCategory MerchantCategory         @relation("merchant_category", fields: [merchant_category_id], references: [id])
   operating_hours  MerchantOperatingHours[] @relation("operating_hours")
   product          Product[]                @relation("merchant_product")
 
@@ -184,7 +185,7 @@ model Courier {
   pending_rides Int @default(0)
   cancel_rides  Int @default(0)
 
-  User User @relation("user_courier", fields: [user_id], references: [id])
+  user User @relation("user_courier", fields: [user_id], references: [id])
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -197,7 +198,7 @@ model MerchantCategory {
 
   name String @unique
 
-  Merchant Merchant[] @relation("merchant_category")
+  merchant Merchant[] @relation("merchant_category")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -220,7 +221,7 @@ model Address {
 
   is_primary Boolean
 
-  User User? @relation("user_address", fields: [user_id], references: [id])
+  user User? @relation("user_address", fields: [user_id], references: [id])
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -250,7 +251,7 @@ model Promo {
   id Int @id @default(autoincrement())
 
   thumbnail       String
-  code            String
+  code            String @unique
   name            String?
   discount_amount Float
   expiration_date DateTime
@@ -282,6 +283,7 @@ model Product {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
+  cart Cart[] @relation("product_cart")
   merchant Merchant @relation("merchant_product", fields: [merchant_id], references: [id])
   category ProducCategory @relation("product_category", fields: [category_id], references: [id])
 
@@ -300,4 +302,20 @@ model ProducCategory {
   product Product[] @relation("product_category")
 
   @@map("product_category")
+}
+
+model Cart {
+  id Int @id @default(autoincrement())
+
+  quantity Int
+  note String?
+
+  customer_id Int
+  product_id Int
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  customer Customer @relation("customer_cart", fields: [customer_id], references: [id])
+  product Product @relation("product_cart", fields: [product_id], references: [id])
 }
