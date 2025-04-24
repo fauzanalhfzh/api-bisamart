@@ -2,6 +2,9 @@
 CREATE TYPE "Roles" AS ENUM ('CUSTOMER', 'MERCHANT', 'COURIER');
 
 -- CreateEnum
+CREATE TYPE "DeliveryMethod" AS ENUM ('PICKUP', 'DELIVERY', 'BOTH');
+
+-- CreateEnum
 CREATE TYPE "OrderStatus" AS ENUM ('PENDING', 'ACCEPTED', 'COMPLETED', 'CANCELLED');
 
 -- CreateEnum
@@ -9,6 +12,9 @@ CREATE TYPE "CourierStatus" AS ENUM ('ONLINE', 'OFFLINE');
 
 -- CreateEnum
 CREATE TYPE "MerchantStatus" AS ENUM ('BUKA', 'TUTUP', 'TAHAN');
+
+-- CreateEnum
+CREATE TYPE "DayOfWeek" AS ENUM ('SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU', 'MINGGU');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -38,7 +44,7 @@ CREATE TABLE "user_otp" (
 
 -- CreateTable
 CREATE TABLE "password_reset_token" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "user_id" INTEGER NOT NULL,
     "token" TEXT NOT NULL,
     "expiresAt" TIMESTAMP(3) NOT NULL,
@@ -148,10 +154,10 @@ CREATE TABLE "addresses" (
 CREATE TABLE "merchant_operating_hours" (
     "id" SERIAL NOT NULL,
     "merchant_id" INTEGER NOT NULL,
-    "day_of_week" TEXT NOT NULL,
+    "day_of_week" "DayOfWeek" NOT NULL,
     "is_24_hours" BOOLEAN NOT NULL DEFAULT false,
-    "open_time" TEXT NOT NULL,
-    "close_time" TEXT NOT NULL,
+    "open_time" TEXT,
+    "close_time" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -160,7 +166,7 @@ CREATE TABLE "merchant_operating_hours" (
 
 -- CreateTable
 CREATE TABLE "promo" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "thumbnail" TEXT NOT NULL,
     "code" TEXT NOT NULL,
     "name" TEXT,
@@ -182,6 +188,7 @@ CREATE TABLE "products" (
     "price" DOUBLE PRECISION NOT NULL,
     "stock" INTEGER NOT NULL,
     "netto" INTEGER NOT NULL,
+    "delivery_method" "DeliveryMethod" NOT NULL DEFAULT 'DELIVERY',
     "discount" INTEGER,
     "merchant_id" INTEGER NOT NULL,
     "category_id" INTEGER NOT NULL,
@@ -200,6 +207,19 @@ CREATE TABLE "product_category" (
     "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "product_category_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "cart" (
+    "id" SERIAL NOT NULL,
+    "quantity" INTEGER NOT NULL,
+    "note" TEXT,
+    "customer_id" INTEGER NOT NULL,
+    "product_id" INTEGER NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "cart_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -236,6 +256,9 @@ CREATE UNIQUE INDEX "couriers_ktp_key" ON "couriers"("ktp");
 CREATE UNIQUE INDEX "merchant_category_name_key" ON "merchant_category"("name");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "promo_code_key" ON "promo"("code");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "product_category_name_key" ON "product_category"("name");
 
 -- AddForeignKey
@@ -267,3 +290,9 @@ ALTER TABLE "products" ADD CONSTRAINT "products_merchant_id_fkey" FOREIGN KEY ("
 
 -- AddForeignKey
 ALTER TABLE "products" ADD CONSTRAINT "products_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "product_category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "cart" ADD CONSTRAINT "cart_customer_id_fkey" FOREIGN KEY ("customer_id") REFERENCES "customers"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "cart" ADD CONSTRAINT "cart_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
