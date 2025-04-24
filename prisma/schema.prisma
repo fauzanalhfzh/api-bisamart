@@ -62,10 +62,10 @@ model User {
   OTP           UserOTP[]            @relation("user_otp")
   ResetPassword PasswordResetToken[] @relation("reset_password")
 
-  customer  Customer? @relation("user_customer")
-  merchant  Merchant? @relation("user_merchant")
-  courier   Courier?  @relation("user_courier")
-  addresses Address[] @relation("user_address")
+  Customer  Customer? @relation("user_customer")
+  Merchant  Merchant? @relation("user_merchant")
+  Courier   Courier?  @relation("user_courier")
+  Addresses Address[] @relation("user_address")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -79,7 +79,7 @@ model UserOTP {
   otp       String
   expiresAt DateTime
 
-  user User @relation("user_otp", fields: [user_id], references: [id], onDelete: Cascade)
+  User User @relation("user_otp", fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("user_otp")
 }
@@ -91,7 +91,7 @@ model PasswordResetToken {
   token     String
   expiresAt DateTime
 
-  user User @relation("reset_password", fields: [user_id], references: [id], onDelete: Cascade)
+  User User @relation("reset_password", fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("password_reset_token")
 }
@@ -108,8 +108,8 @@ model Customer {
   pending_order Int @default(0)
   cancel_order  Int @default(0)
 
-  user User   @relation("user_customer", fields: [user_id], references: [id])
-  cart Cart[] @relation("customer_cart")
+  User User   @relation("user_customer", fields: [user_id], references: [id])
+  Cart Cart[] @relation("customer_cart")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -146,10 +146,10 @@ model Merchant {
   pending_order Int @default(0)
   cancel_order  Int @default(0)
 
-  user             User                     @relation("user_merchant", fields: [user_id], references: [id])
-  merchantCategory MerchantCategory         @relation("merchant_category", fields: [merchant_category_id], references: [id])
-  operating_hours  MerchantOperatingHours[] @relation("operating_hours")
-  product          Product[]                @relation("merchant_product")
+  User             User                     @relation("user_merchant", fields: [user_id], references: [id])
+  MerchantCategory MerchantCategory         @relation("merchant_category", fields: [merchant_category_id], references: [id])
+  Operating_hours  MerchantOperatingHours[] @relation("operating_hours")
+  Product          Product[]                @relation("merchant_product")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -185,7 +185,7 @@ model Courier {
   pending_rides Int @default(0)
   cancel_rides  Int @default(0)
 
-  user User @relation("user_courier", fields: [user_id], references: [id])
+  User User @relation("user_courier", fields: [user_id], references: [id])
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -198,7 +198,7 @@ model MerchantCategory {
 
   name String @unique
 
-  merchant Merchant[] @relation("merchant_category")
+  Merchant Merchant[] @relation("merchant_category")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -221,7 +221,7 @@ model Address {
 
   is_primary Boolean
 
-  user User? @relation("user_address", fields: [user_id], references: [id])
+  User User? @relation("user_address", fields: [user_id], references: [id])
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -242,7 +242,7 @@ model MerchantOperatingHours {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  merchant Merchant @relation("operating_hours", fields: [merchant_id], references: [id])
+  Merchant Merchant @relation("operating_hours", fields: [merchant_id], references: [id])
 
   @@map("merchant_operating_hours")
 }
@@ -283,9 +283,9 @@ model Product {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  cart     Cart[]         @relation("product_cart")
-  merchant Merchant       @relation("merchant_product", fields: [merchant_id], references: [id])
-  category ProducCategory @relation("product_category", fields: [category_id], references: [id])
+  Cart     Cart[]         @relation("product_cart")
+  Merchant Merchant       @relation("merchant_product", fields: [merchant_id], references: [id])
+  Category ProducCategory @relation("product_category", fields: [category_id], references: [id])
 
   @@map("products")
 }
@@ -299,7 +299,7 @@ model ProducCategory {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  product Product[] @relation("product_category")
+  Product Product[] @relation("product_category")
 
   @@map("product_category")
 }
@@ -316,6 +316,8 @@ model Cart {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  customer Customer @relation("customer_cart", fields: [customer_id], references: [id])
-  product  Product  @relation("product_cart", fields: [product_id], references: [id])
+  Customer Customer @relation("customer_cart", fields: [customer_id], references: [id])
+  Product  Product  @relation("product_cart", fields: [product_id], references: [id])
+
+  @@map("cart")
 }
