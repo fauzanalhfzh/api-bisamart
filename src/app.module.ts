@@ -7,7 +7,8 @@ import { AddressModule } from './address/address.module';
 import { CourierModule } from './courier/courier.module';
 import { MerchantModule } from './merchant/merchant.module';
 import { ProductModule } from './product/product.module';
-import { CouponModule } from './promo/promo.module';
+import { PromoModule } from './promo/promo.module';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -20,8 +21,9 @@ import { CouponModule } from './promo/promo.module';
     ProductModule,
     CategoryModule,
     // ? coupon module
-    CouponModule
-    // ! cart module
+    PromoModule,
+    // ? cart module
+    CartModule
     // ! order module
     // ! payment module
     // ! notification module
