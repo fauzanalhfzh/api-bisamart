@@ -23,7 +23,7 @@ import { CartModule } from './cart/cart.module';
     // ? coupon module
     PromoModule,
     // ? cart module
-    CartModule
+    CartModule,
     // ! order module
     // ! payment module
     // ! notification module

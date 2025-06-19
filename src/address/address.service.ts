@@ -1,4 +1,11 @@
-import { BadRequestException, HttpException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Address, User } from '@prisma/client';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from 'src/common/prisma.service';
@@ -58,7 +65,8 @@ export class AddressService {
 
     if (existingPrimary && request.is_primary) {
       throw new HttpException(
-        'User sudah memiliki alamat utama. Hanya satu alamat yang bisa menjadi primary.', 400,
+        'User sudah memiliki alamat utama. Hanya satu alamat yang bisa menjadi primary.',
+        400,
       );
     }
 
@@ -85,27 +93,29 @@ export class AddressService {
 
   async delete(user: User, id: number): Promise<AddressResponse> {
     this.logger.debug(`AddressService.delete(${user.id}, ${id})`);
-  
+
     // Cek apakah alamat ada dan milik user
     const address = await this.prismaService.address.findUnique({
       where: { id },
     });
-  
+
     if (!address) {
       throw new NotFoundException('Alamat tidak ditemukan.');
     }
-  
+
     if (address.user_id !== user.id) {
-      throw new UnauthorizedException('Anda tidak memiliki izin untuk menghapus alamat ini.');
+      throw new UnauthorizedException(
+        'Anda tidak memiliki izin untuk menghapus alamat ini.',
+      );
     }
-  
+
     // Jika alamat yang dihapus adalah primary
     if (address.is_primary) {
       // Cari alamat lain milik user untuk dijadikan primary
       const otherAddress = await this.prismaService.address.findFirst({
         where: { user_id: user.id, id: { not: id } },
       });
-  
+
       if (otherAddress) {
         await this.prismaService.address.update({
           where: { id: otherAddress.id },
@@ -113,14 +123,14 @@ export class AddressService {
         });
       }
     }
-  
+
     // Hapus alamat
     const deletedAddress = await this.prismaService.address.delete({
       where: { id },
     });
-  
+
     this.logger.debug(`Address ${id} berhasil dihapus.`);
-  
+
     return this.toAddressResponse(deletedAddress);
   }
 }

@@ -9,7 +9,7 @@ export class ProductValidation {
     netto: z.number().min(1),
     discount: z.number().min(1).optional(),
     merchant_id: z.number(),
-    category_id: z.number()
+    category_id: z.number(),
   });
   static readonly UDPATE_PRODUCT: ZodType = z.object({
     name: z.string().min(1).max(100).optional(),

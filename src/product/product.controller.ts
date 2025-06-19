@@ -23,7 +23,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { Auth } from '../common/auth.decorator';
-import { DeliveryMethod, Merchant, User } from '@prisma/client';
+import { Merchant, User } from '@prisma/client';
 import {
   CreateProductRequest,
   ProductResponse,
@@ -58,7 +58,7 @@ export class ProductController {
           },
           filename(req, file, cb) {
             const timestamp = Date.now();
-            let prefix = 'PR';
+            const prefix = 'PR';
             const filename = `${prefix}-${timestamp}${extname(file.originalname)}`;
             cb(null, filename);
           },
@@ -99,7 +99,7 @@ export class ProductController {
           },
           filename(req, file, cb) {
             const timestamp = Date.now();
-            let prefix = 'PR';
+            const prefix = 'PR';
             const filename = `${prefix}-${timestamp}${extname(file.originalname)}`;
             cb(null, filename);
           },
@@ -143,7 +143,7 @@ export class ProductController {
     const result = await this.productService.getAllProduct(
       pageNumber,
       takeNumber,
-      search
+      search,
     );
     return {
       data: result,

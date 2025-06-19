@@ -15,10 +15,12 @@ export class UserValidation {
 
   static readonly VERIFIED: ZodType = z.object({
     otp: z.string().max(5),
-  })
+  });
 
-  static readonly UPDATE: ZodType = z.object({
-    name: z.string().min(1).max(100).optional(),
-    password: z.string().min(1).max(100).optional(),
-  }).partial();
+  static readonly UPDATE: ZodType = z
+    .object({
+      name: z.string().min(1).max(100).optional(),
+      password: z.string().min(1).max(100).optional(),
+    })
+    .partial();
 }

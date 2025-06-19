@@ -44,7 +44,6 @@ export class AddressResponse {
   postal_code: string;
   latitude: number;
   longitude: number;
-  
   is_primary: boolean;
 
   created_at: Date;

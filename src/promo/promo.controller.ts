@@ -53,7 +53,7 @@ export class PromoController {
           },
           filename(req, file, cb) {
             const timestamp = Date.now();
-            let prefix = 'PROMO';
+            const prefix = 'PROMO';
             const filename = `${prefix}-${timestamp}${extname(file.originalname)}`;
             cb(null, filename);
           },

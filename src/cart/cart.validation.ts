@@ -10,5 +10,5 @@ export class CartValidation {
   static readonly DELETEITEM: ZodType = z.object({
     customer_id: z.number().min(1).positive(),
     product_id: z.number().min(1).positive(),
-  })
+  });
 }

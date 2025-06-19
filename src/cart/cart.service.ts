@@ -3,7 +3,11 @@ import { Cart, User } from '@prisma/client';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from 'src/common/prisma.service';
 import { ValidationService } from 'src/common/validation.service';
-import { AddingToCartRequest, CartResponse, DeleteItemFromCart } from 'src/model/cart.model';
+import {
+  AddingToCartRequest,
+  CartResponse,
+  DeleteItemFromCart,
+} from 'src/model/cart.model';
 import { Logger } from 'winston';
 import { CartValidation } from './cart.validation';
 
@@ -29,7 +33,10 @@ export class CartService {
     return cartResponse;
   }
 
-  async addToCart(user: User, request: AddingToCartRequest): Promise<CartResponse> {
+  async addToCart(
+    user: User,
+    request: AddingToCartRequest,
+  ): Promise<CartResponse> {
     const cartRequest: AddingToCartRequest = this.validationService.validate(
       CartValidation.ADDINGTOCART,
       request,
@@ -70,29 +77,38 @@ export class CartService {
       });
     }
 
-    this.logger.info(`Added to cart: customer=${cartRequest.customer_id}, product=${cartRequest.product_id}`);
+    this.logger.info(
+      `Added to cart: customer=${cartRequest.customer_id}, product=${cartRequest.product_id}`,
+    );
     return this.toCartResponse(cart);
   }
 
-  async DeleteItemFromCart(user: User, request: DeleteItemFromCart): Promise<void> {
+  async DeleteItemFromCart(
+    user: User,
+    request: DeleteItemFromCart,
+  ): Promise<void> {
     const cartRequest: DeleteItemFromCart = this.validationService.validate(
-        CartValidation.DELETEITEM,
-        request,
-      );
+      CartValidation.DELETEITEM,
+      request,
+    );
 
     const cartItem = await this.prismaService.cart.findFirst({
-        where: { customer_id: cartRequest.customer_id, product_id: cartRequest.product_id },
-      });
-  
-      if (!cartItem) {
-        throw new NotFoundException('Item not found in cart');
-      }
-  
-      await this.prismaService.cart.delete({
-        where: { id: cartItem.id },
-      });
-  
-      this.logger.info(`Deleted item from cart: customer=${cartRequest.customer_id}, product=${cartRequest.product_id}`);
-    
+      where: {
+        customer_id: cartRequest.customer_id,
+        product_id: cartRequest.product_id,
+      },
+    });
+
+    if (!cartItem) {
+      throw new NotFoundException('Item not found in cart');
+    }
+
+    await this.prismaService.cart.delete({
+      where: { id: cartItem.id },
+    });
+
+    this.logger.info(
+      `Deleted item from cart: customer=${cartRequest.customer_id}, product=${cartRequest.product_id}`,
+    );
   }
 }

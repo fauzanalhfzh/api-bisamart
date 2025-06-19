@@ -6,20 +6,13 @@ import {
   Param,
   ParseIntPipe,
   Post,
-  UseInterceptors,
 } from '@nestjs/common';
-import {
-  ApiConsumes,
-  ApiOperation,
-  ApiSecurity,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { AddressService } from './address.service';
 import { AddressResponse, CreateAddressRequest } from 'src/model/address.model';
 import { WebResponse } from 'src/model/web.model';
 import { Auth } from 'src/common/auth.decorator';
 import { User } from '@prisma/client';
-import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Address User')
 @Controller('/api/v1/users/addresses')

@@ -10,7 +10,12 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { WebResponse } from '../model/web.model';
-import { ApiConsumes, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import {
+  ApiConsumes,
+  ApiOperation,
+  ApiSecurity,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   ForgotPasswordRequest,
   LoginUserRequest,
@@ -58,8 +63,6 @@ export class UserController {
     };
   }
 
-
-
   @Get('/current')
   @HttpCode(200)
   @ApiSecurity('Authorization')
@@ -77,27 +80,21 @@ export class UserController {
   @HttpCode(200)
   @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'send OTP user' })
-  async verified(
-    @Auth() user: User,
-  ) {
+  async verified(@Auth() user: User) {
     const result = await this.userService.sendOtp(user);
     return {
       data: result,
     };
   }
-  
+
   @Post('/auth/verify-otp')
   @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'Verifikasi OTP untuk user' })
-  async verifyOtp(
-    @Auth() user: User,
-    @Body() request: VerifiedUserRequest,
-    
-  ) {
+  async verifyOtp(@Auth() user: User, @Body() request: VerifiedUserRequest) {
     const result = await this.userService.verifiedOtp(user, request);
     return {
-      data: result
-    }
+      data: result,
+    };
   }
 
   @Post('/forgot-password')
@@ -106,14 +103,13 @@ export class UserController {
   async forgotPassword(@Body() request: ForgotPasswordRequest) {
     return this.userService.forgotPassword(request);
   }
-  
+
   @Post('/reset-password')
   @HttpCode(200)
   @ApiOperation({ summary: 'Reset password' })
   async resetPassword(@Body() request: ResetPasswordRequest) {
     return this.userService.resetPassword(request);
   }
-
 
   @Patch('/current')
   @HttpCode(200)

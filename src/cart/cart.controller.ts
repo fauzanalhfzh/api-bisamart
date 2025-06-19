@@ -2,7 +2,7 @@ import { Body, Controller, Delete, HttpCode, Post } from '@nestjs/common';
 import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { Auth } from 'src/common/auth.decorator';
-import { AddingToCartRequest, CartResponse, DeleteItemFromCart } from 'src/model/cart.model';
+import { AddingToCartRequest, DeleteItemFromCart } from 'src/model/cart.model';
 import { WebResponse } from 'src/model/web.model';
 import { CartService } from './cart.service';
 
@@ -21,21 +21,21 @@ export class CartController {
   ): Promise<WebResponse<boolean>> {
     const result = await this.cartService.addToCart(user, request);
     return {
-      data: true,
+      data: result,
     };
   }
 
   @Delete('/cart/delete')
-    @HttpCode(200)
-    @ApiSecurity('Authorization')
-    @ApiOperation({ summary: 'Delete item to cart' })
-    async delete(
-      @Auth() user: User,
-      @Body() request: DeleteItemFromCart,
-    ): Promise<WebResponse<boolean>> {
-      await this.cartService.DeleteItemFromCart(user, request);
-      return {
-        data: true,
-      };
-    }
+  @HttpCode(200)
+  @ApiSecurity('Authorization')
+  @ApiOperation({ summary: 'Delete item to cart' })
+  async delete(
+    @Auth() user: User,
+    @Body() request: DeleteItemFromCart,
+  ): Promise<WebResponse<boolean>> {
+    await this.cartService.DeleteItemFromCart(user, request);
+    return {
+      data: true,
+    };
+  }
 }

@@ -43,4 +43,4 @@ $ npm run test:cov
 ## Stay in touch
 
 - Author - [Mohamammad Fauzan Alhafizh](https://zenstoryy.com)
-- Website - [https://bisamart.com](https://bisamart.com/)
+- Website - [https://bisamart.id](https://bisamart.com/)

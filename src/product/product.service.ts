@@ -1,10 +1,5 @@
-import {
-  BadRequestException,
-  HttpException,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
-import { DeliveryMethod, Merchant, Prisma, Product, Roles, User } from '@prisma/client';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
+import { Merchant, Prisma, Product, Roles, User } from '@prisma/client';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from '../common/prisma.service';
 import { ValidationService } from '../common/validation.service';
