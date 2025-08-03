@@ -38,6 +38,6 @@ async function bootstrap() {
   // TODO Pindahkan ke folder storage karna image tidak bisa di akses public selain product
   app.use('/public', express.static(join(process.cwd(), 'public')));
 
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
 }
 bootstrap();
