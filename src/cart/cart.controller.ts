@@ -18,7 +18,7 @@ export class CartController {
   async create(
     @Auth() user: User,
     @Body() request: AddingToCartRequest,
-  ): Promise<WebResponse<boolean>> {
+  ): Promise<WebResponse<AddingToCartRequest>> {
     const result = await this.cartService.addToCart(user, request);
     return {
       data: result,
