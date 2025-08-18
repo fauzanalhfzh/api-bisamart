@@ -36,7 +36,7 @@ export class CourierController {
   @Post('/auth/register')
   @HttpCode(200)
   @ApiOperation({ summary: 'Register new driver' })
-  @ApiSecurity('Authorization')
+  // @ApiSecurity('Authorization')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileFieldsInterceptor(
