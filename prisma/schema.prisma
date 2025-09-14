@@ -55,7 +55,7 @@ model User {
   phone_number String  @unique
   password     String
   roles        Roles   @default(CUSTOMER)
-  is_verified  Boolean @default(true)
+  is_verified  Boolean @default(false)
 
   token String?
 
