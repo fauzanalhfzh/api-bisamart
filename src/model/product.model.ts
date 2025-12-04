@@ -51,13 +51,13 @@ export class ProductResponse {
   image: string;
   name: string;
   description: string;
-  
+
   price: number;
   stock: number;
   netto: number;
   discount: number;
   delivery_method: DeliveryMethod;
-  
+
   created_at: Date;
   updated_at: Date;
 }

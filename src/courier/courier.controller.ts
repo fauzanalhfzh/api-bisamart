@@ -102,7 +102,6 @@ export class CourierController {
     };
   }
 
-
   @Get('/current')
   @HttpCode(200)
   @ApiSecurity('Authorization')
@@ -133,7 +132,6 @@ export class CourierController {
   @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'Update Courier Status' })
   async updateStatus(
-    
     @Auth() user: User,
     @Body() request: UpdateStatusRequest,
   ): Promise<WebResponse<CourierResponse>> {
@@ -142,5 +140,4 @@ export class CourierController {
       data: result,
     };
   }
-
 }

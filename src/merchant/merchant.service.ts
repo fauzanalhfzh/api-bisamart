@@ -232,9 +232,9 @@ export class MerchantService {
       );
 
     const merchant = await this.prismaService.merchant.findUnique({
-      where: {user_id: user.id}
-    })
-      
+      where: { user_id: user.id },
+    });
+
     const result = await this.prismaService.merchantOperatingHours.create({
       data: {
         merchant_id: merchant.id,

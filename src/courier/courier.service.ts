@@ -1,4 +1,9 @@
-import { HttpException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
 import { ValidationService } from '../common/validation.service';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
@@ -61,7 +66,10 @@ export class CourierService {
     this.logger.debug(`DriverService.register(${JSON.stringify(request)})`);
 
     if (!user.is_verified) {
-      throw new HttpException('Email harus diverifikasi sebelum mendaftar sebagai Courier', 400);
+      throw new HttpException(
+        'Email harus diverifikasi sebelum mendaftar sebagai Courier',
+        400,
+      );
     }
 
     if (request.vehicle_speed !== undefined && request.vehicle_speed !== null) {
@@ -78,14 +86,14 @@ export class CourierService {
     const registerRequest: RegisterCourierRequest =
       this.validationService.validate(CourierValidation.REGISTER, request);
 
-      const existingMerchant = await this.prismaService.merchant.findUnique({
-        where: { user_id: user.id },
-      });
-  
-      if (existingMerchant) {
-        throw new HttpException('User sudah terdaftar sebagai Courier', 400);
-      }
-      
+    const existingMerchant = await this.prismaService.merchant.findUnique({
+      where: { user_id: user.id },
+    });
+
+    if (existingMerchant) {
+      throw new HttpException('User sudah terdaftar sebagai Courier', 400);
+    }
+
     if (files.ktp_photo?.[0]) {
       registerRequest.ktp_photo = `/storage/courier/ktp/${files.ktp_photo[0].filename}`;
     }
@@ -101,10 +109,9 @@ export class CourierService {
     }
 
     await this.prismaService.user.update({
-      where: { id: user.id},
-      data: { roles: "COURIER"}
-    })
-
+      where: { id: user.id },
+      data: { roles: 'COURIER' },
+    });
 
     const courier = await this.prismaService.courier.create({
       data: {
@@ -129,18 +136,18 @@ export class CourierService {
 
   async get(user: User): Promise<CourierResponse> {
     this.logger.debug(`DriverService.Get (${JSON.stringify(user)})`);
-  
+
     const courier = await this.prismaService.courier.findUnique({
       where: { user_id: user.id },
       include: {
-        User: true, 
+        User: true,
       },
     });
-  
+
     if (!courier) {
       throw new NotFoundException('Courier tidak ditemukan.');
     }
-  
+
     return this.toCourierResponse(courier);
   }
 

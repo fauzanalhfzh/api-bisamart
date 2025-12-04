@@ -42,15 +42,15 @@ export class MerchantOperatingHoursRequest {
   day_of_week: DayOfWeek;
   @ApiProperty({ example: true })
   is_24_hours: boolean;
-  @ApiProperty({ example: "08.00" })
+  @ApiProperty({ example: '08.00' })
   open_time?: string;
-  @ApiProperty({ example: "22.00" })
+  @ApiProperty({ example: '22.00' })
   close_time?: string;
 }
 
 export class UpdateStatusRequest {
   @ApiProperty({
-    enum: MerchantStatus, 
+    enum: MerchantStatus,
     example: MerchantStatus.BUKA,
   })
   status: MerchantStatus;
@@ -62,7 +62,7 @@ export class MerchantResponse {
   id: number;
   user_id: number;
   merchant_category_id: number;
-  
+
   ktp: string;
   ktp_photo: string;
   place_of_birth: string;

@@ -7,4 +7,3 @@ import { CartService } from './cart.service';
   controllers: [CartController],
 })
 export class CartModule {}
-

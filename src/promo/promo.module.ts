@@ -7,4 +7,3 @@ import { PromoController } from './promo.controller';
   controllers: [PromoController],
 })
 export class PromoModule {}
-

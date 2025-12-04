@@ -8,4 +8,3 @@ export class PromoValidation {
     usage_limit: z.number().min(1),
   });
 }
-

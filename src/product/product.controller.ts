@@ -15,6 +15,7 @@ import {
 import {
   ApiConsumes,
   ApiOperation,
+  ApiQuery,
   ApiSecurity,
   ApiTags,
 } from '@nestjs/swagger';
@@ -132,6 +133,7 @@ export class ProductController {
     summary:
       'Get all product, use page and take for fastest render data. example : /product?page=1&take10',
   })
+  @ApiQuery({ name: 'search', required: false })
   async getAllProduct(
     @Query('page') page = '1',
     @Query('take') take = '10',

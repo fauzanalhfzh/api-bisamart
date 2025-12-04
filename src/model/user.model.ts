@@ -12,7 +12,7 @@ export class RegisterUserRequest {
   password: string;
 }
 
-export class VerifiedUserRequest{
+export class VerifiedUserRequest {
   @ApiProperty()
   otp: string;
 }

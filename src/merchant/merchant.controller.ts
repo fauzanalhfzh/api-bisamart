@@ -25,7 +25,10 @@ import {
 import { WebResponse } from 'src/model/web.model';
 import { Merchant, User } from '@prisma/client';
 import { Auth } from 'src/common/auth.decorator';
-import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 
@@ -73,8 +76,8 @@ export class MerchantController {
                 break;
             }
 
-            const filename = `${prefix}${timestamp}${extname(file.originalname)}`
-            cb(null, filename)
+            const filename = `${prefix}${timestamp}${extname(file.originalname)}`;
+            cb(null, filename);
           },
         }),
       },
@@ -100,9 +103,7 @@ export class MerchantController {
   @HttpCode(200)
   @ApiSecurity('Authorization')
   @ApiOperation({ summary: 'Get Merchant data' })
-  async get(
-    @Auth() user: User,
-  ): Promise<WebResponse<MerchantResponse>> {
+  async get(@Auth() user: User): Promise<WebResponse<MerchantResponse>> {
     const result = await this.merchantService.get(user);
     return {
       data: result,
@@ -133,7 +134,10 @@ export class MerchantController {
     @Auth() user: User,
     @Body() request: MerchantOperatingHoursRequest,
   ): Promise<WebResponse<MerchantOperatingHoursResponse>> {
-    const result = await this.merchantService.createOperatingHours(user, request);
+    const result = await this.merchantService.createOperatingHours(
+      user,
+      request,
+    );
     return {
       data: result,
     };
