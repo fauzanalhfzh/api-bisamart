@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Roles } from '@prisma/client';
 
 export class RegisterUserRequest {
   @ApiProperty({ example: 'Bisa People 1' })
@@ -30,8 +29,8 @@ export class ForgotPasswordRequest {
 }
 
 export class ResetPasswordRequest {
-  @ApiProperty({ example: 1 })
-  user_id: number;
+  @ApiProperty({ example: 'bisa@example.com' })
+  email: string;
   @ApiProperty({ example: 'f3a1b6e9c2d5f8e0a7b3c6d9e4f2a1b0' })
   token: string;
   @ApiProperty({ example: 'passwordupdate' })

@@ -6,7 +6,6 @@ import {
   ForgotPasswordRequest,
   LoginUserRequest,
   RegisterUserRequest,
-  ResetPasswordRequest,
   UpdateUserRequest,
   UserResponse,
   VerifiedUserRequest,
@@ -265,7 +264,7 @@ export class UserService {
     });
 
     // Kirim email reset password
-    const resetLink = `https://${process.env.DOMAIN_NAME}/api/reset-password?token=${resetToken}&email=${request.email}`;
+    const resetLink = `https://${process.env.DOMAIN_NAME}/api/v1/users/reset-password?token=${resetToken}&email=${request.email}`;
     await this.sendResetEmail(user.email, resetLink);
 
     return { message: 'Link reset password telah dikirim ke email Anda.' };
@@ -299,40 +298,61 @@ export class UserService {
     await transporter.sendMail(mailOptions);
   }
 
-  async resetPassword(request: ResetPasswordRequest) {
-    // Cari token berdasarkan user_id
+  async resetPassword(request: {
+    email: string;
+    token: string;
+    new_password: string;
+  }) {
+    // 1. Cari user dari email
+    const user = await this.prismaService.user.findUnique({
+      where: { email: request.email },
+    });
+
+    if (!user) {
+      throw new HttpException('User tidak ditemukan', 400);
+    }
+
+    // 2. Ambil token berdasarkan user_id
     const passwordReset = await this.prismaService.passwordResetToken.findFirst(
       {
-        where: { user_id: request.user_id },
+        where: { user_id: user.id },
       },
     );
 
-    // Validasi token dengan bcrypt
-    if (
-      !passwordReset ||
-      !(await bcrypt.compare(request.token, passwordReset.token)) ||
-      passwordReset.expiresAt < new Date()
-    ) {
-      throw new HttpException('Token tidak valid atau sudah kedaluwarsa.', 400);
+    if (!passwordReset) {
+      throw new HttpException('Token tidak ditemukan', 400);
     }
 
-    // Hash password baru
+    // 3. Cocokkan token
+    const isTokenValid = await bcrypt.compare(
+      request.token,
+      passwordReset.token,
+    );
+
+    if (!isTokenValid) {
+      throw new HttpException('Token tidak valid', 400);
+    }
+
+    // 4. Validasi expiry
+    if (passwordReset.expiresAt.getTime() < Date.now()) {
+      throw new HttpException('Token sudah kedaluwarsa', 400);
+    }
+
+    // 5. Update password
     const hashedPassword = await bcrypt.hash(request.new_password, 10);
 
-    // Update password pengguna
     await this.prismaService.user.update({
-      where: { id: passwordReset.user_id },
+      where: { id: user.id },
       data: { password: hashedPassword },
     });
 
-    // Hapus token reset password setelah digunakan
-    await this.prismaService.passwordResetToken.delete({
-      where: { user_id: passwordReset.user_id },
+    // 6. Hapus token
+    await this.prismaService.passwordResetToken.deleteMany({
+      where: { user_id: user.id },
     });
 
     return {
-      message:
-        'Password berhasil direset. Silakan login dengan password baru Anda.',
+      message: 'Password berhasil direset. Silakan login kembali.',
     };
   }
 

@@ -27,7 +27,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('docs', app, document);
 
   const logger = app.get(WINSTON_MODULE_NEST_PROVIDER);
   app.useLogger(logger);

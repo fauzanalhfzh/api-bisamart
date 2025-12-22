@@ -6,6 +6,8 @@ import {
   HttpCode,
   Patch,
   Post,
+  Query,
+  Res,
   UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
@@ -28,6 +30,7 @@ import {
 import { Auth } from '../common/auth.decorator';
 import { User } from '@prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
 
 @ApiTags('Users')
 @Controller('/api/v1/users')
@@ -109,6 +112,76 @@ export class UserController {
   @ApiOperation({ summary: 'Reset password' })
   async resetPassword(@Body() request: ResetPasswordRequest) {
     return this.userService.resetPassword(request);
+  }
+
+  @Get('/reset-password')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Reset password page (UI)' })
+  resetPasswordPage(
+    @Query('token') token: string,
+    @Query('email') email: string,
+    @Res() res: Response,
+  ) {
+    if (!token || !email) {
+      return res.status(400).send('Token atau email tidak valid');
+    }
+
+    return res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Reset Password</title>
+      <style>
+        body {
+          font-family: Arial;
+          background: #f3f4f6;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+        }
+        .card {
+          background: white;
+          padding: 24px;
+          width: 360px;
+          border-radius: 8px;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+          text-align: center;
+        }
+        input {
+          width: 100%;
+          padding: 10px;
+          margin-top: 10px;
+        }
+        button {
+          width: 100%;
+          padding: 10px;
+          margin-top: 16px;
+          background: #2563eb;
+          color: white;
+          border: none;
+          border-radius: 4px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <h2>Reset Password</h2>
+        <form method="POST" action="/api/v1/users/reset-password">
+          <input type="hidden" name="email" value="${email}" />
+          <input type="hidden" name="token" value="${token}" />
+
+          <input type="password" name="new_password" placeholder="Password baru" required />
+          <input type="password" name="confirm_password" placeholder="Konfirmasi password" required />
+
+          <button type="submit">Reset Password</button>
+        </form>
+      </div>
+    </body>
+    </html>
+  `);
   }
 
   @Patch('/current')
