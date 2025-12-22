@@ -265,7 +265,7 @@ export class UserService {
     });
 
     // Kirim email reset password
-    const resetLink = `http://localhost:3000/api/reset-password?token=${resetToken}&email=${request.email}`;
+    const resetLink = `https://${process.env.DOMAIN_NAME}/api/reset-password?token=${resetToken}&email=${request.email}`;
     await this.sendResetEmail(user.email, resetLink);
 
     return { message: 'Link reset password telah dikirim ke email Anda.' };
