@@ -8,6 +8,8 @@ import { APP_FILTER } from '@nestjs/core';
 import { ErrorFilter } from './error.filter';
 import { AuthMiddleware } from './auth.middleware';
 
+import { PaymentService } from './payment.service';
+
 @Global()
 @Module({
   imports: [
@@ -27,8 +29,9 @@ import { AuthMiddleware } from './auth.middleware';
       provide: APP_FILTER,
       useClass: ErrorFilter,
     },
+    PaymentService,
   ],
-  exports: [PrismaService, ValidationService],
+  exports: [PrismaService, ValidationService, PaymentService],
 })
 export class CommonModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

@@ -9,6 +9,7 @@ import { MerchantModule } from './merchant/merchant.module';
 import { ProductModule } from './product/product.module';
 import { PromoModule } from './promo/promo.module';
 import { CartModule } from './cart/cart.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -24,7 +25,9 @@ import { CartModule } from './cart/cart.module';
     PromoModule,
     // ? cart module
     CartModule,
+    CartModule,
     // ! order module
+    OrderModule,
     // ! payment module
     // ! notification module
     // ! messagging module
@@ -32,4 +35,4 @@ import { CartModule } from './cart/cart.module';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }

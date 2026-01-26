@@ -110,6 +110,7 @@ model Customer {
 
   User User   @relation("user_customer", fields: [user_id], references: [id])
   Cart Cart[] @relation("customer_cart")
+  Order Order[] @relation("customer_order")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -119,7 +120,7 @@ model Customer {
 
 model Merchant {
   id Int @id @default(autoincrement())
-
+  
   user_id              Int @unique
   merchant_category_id Int @unique
 
@@ -222,6 +223,7 @@ model Address {
   is_primary Boolean
 
   User User? @relation("user_address", fields: [user_id], references: [id])
+  Order Order[] @relation("order_address")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -286,6 +288,7 @@ model Product {
   Cart     Cart[]         @relation("product_cart")
   Merchant Merchant       @relation("merchant_product", fields: [merchant_id], references: [id])
   Category ProducCategory @relation("product_category", fields: [category_id], references: [id])
+  OrderItems OrderItem[] @relation("product_order_items")
 
   @@map("products")
 }
@@ -320,4 +323,44 @@ model Cart {
   Product  Product  @relation("product_cart", fields: [product_id], references: [id])
 
   @@map("cart")
+}
+
+model Order {
+  id String @id @default(uuid())
+
+  customer_id Int
+  address_id Int?
+  
+  total_amount Float
+  shipping_cost Float @default(0)
+  
+  status OrderStatus @default(PENDING)
+  snap_token String?
+  snap_redirect_url String?
+  
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  Customer Customer @relation("customer_order", fields: [customer_id], references: [id])
+  Address Address? @relation("order_address", fields: [address_id], references: [id])
+  OrderItems OrderItem[] @relation("order_items")
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id Int @id @default(autoincrement())
+  
+  order_id String
+  product_id Int
+  
+  product_name String
+  product_price Float
+  quantity Int
+  note String?
+
+  Order Order @relation("order_items", fields: [order_id], references: [id])
+  Product Product @relation("product_order_items", fields: [product_id], references: [id])
+
+  @@map("order_items")
 }
